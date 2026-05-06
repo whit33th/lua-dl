@@ -23,10 +23,9 @@ export function ProgressPanel() {
 
   return (
     <section
-      className="border relative border-line  bg-panel shadow-lg p-5"
+      className="border  border-line  bg-panel  p-5"
       aria-labelledby="progress-title"
     >
-      <Border />
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">

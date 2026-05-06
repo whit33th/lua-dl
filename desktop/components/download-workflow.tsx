@@ -57,10 +57,9 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="border border-line relative flex-1 h-full bg-panel shadow-lg p-5"
+      className="border border-line  flex-1 h-full bg-panel  p-5"
       aria-labelledby="download-title"
     >
-      <Border />
       <div className="flex items-center justify-between gap-4 mb-5">
         <div>
           <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">

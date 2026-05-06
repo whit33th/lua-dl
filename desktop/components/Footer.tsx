@@ -42,7 +42,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="rounded-4xl bg-black shadow-lg shadow-black/20 mx-6">
+    <footer className="rounded-4xl bg-black  shadow-black/20 mx-6">
       <details
         className="group"
         open={isOpen}

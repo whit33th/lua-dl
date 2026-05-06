@@ -29,7 +29,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
       <aside
-        className="w-[min(560px,100%)] max-h-screen border border-line rounded-4xl bg-panel shadow-lg p-5 flex flex-col"
+        className="w-[min(560px,100%)] max-h-screen border border-line rounded-4xl bg-panel  p-5 flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"

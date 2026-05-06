@@ -36,7 +36,7 @@ export default function RootLayout({
         <Frame />
 
         <div className="flex flex-1 flex-col gap-2 p-5 pt-0">
-          <main className="h-[calc(100vh-32px-8px-8px-20px)] overflow-hidden rounded-4xl flex flex-col bg-black  pb-6  gap-4 text-neutral-50 shadow-lg shadow-black/20">
+          <main className="h-[calc(100vh-32px-8px-8px-20px)] overflow-hidden rounded-4xl flex flex-col bg-black  pb-6  gap-4 text-neutral-50  shadow-black/20">
             {children}
           </main>
         </div>

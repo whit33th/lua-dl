@@ -122,7 +122,8 @@ export function AppShell() {
       />
 
       <section className="flex h-full flex-1 gap-4 px-6">
-        <div className="grid min-h-0 grid-rows-2 gap-4 w-full">
+        <div className="grid relative  grid-rows-2 gap-4 w-full">
+          <Border />
           <DownloadWorkflow onDownload={startDownload} />
 
           <ProgressPanel />
@@ -133,7 +134,7 @@ export function AppShell() {
           aria-label="Session details"
         >
           <Border />
-          <div className="grid min-h-0 h-full  gap-3.5 p-3.5 border border-line  bg-panel shadow-lg">
+          <div className="grid  h-full  gap-3.5 p-3.5 border border-line   ">
             <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-4xl bg-black">
               {metadata?.headerImage ? (
                 // eslint-disable-next-line @next/next/no-img-element

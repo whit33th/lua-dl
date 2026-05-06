@@ -47,7 +47,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         type="submit"
         aria-label="Inspect App ID"
         disabled={isLoading}
-        className=" absolute right-2 top-1/2 -translate-y-1/2 bg-panel-strong w-14 text-text transition-all hover:border-text hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-42 grid place-items-center"
+        className=" absolute right-2 top-1/2 -translate-y-1/2 bg-panel-strong w-14 text-text transition-all hover:border-text disabled:cursor-not-allowed disabled:opacity-42 grid place-items-center"
       >
         {isLoading ? (
           <Loader2 className="animate-spin" size={20} aria-hidden="true" />

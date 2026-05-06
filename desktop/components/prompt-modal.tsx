@@ -37,7 +37,7 @@ export function PromptModal() {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
       <div
-        className="w-[min(560px,100%)] border border-line rounded-4xl bg-panel shadow-lg p-5"
+        className="w-[min(560px,100%)] border border-line rounded-4xl bg-panel  p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="prompt-title"

@@ -37,7 +37,7 @@ export function CliFeed() {
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/45 backdrop-blur">
       <section
-        className="w-full max-h-[62vh] m-0 overflow-hidden border border-line rounded-t-2xl bg-panel shadow-lg"
+        className="w-full max-h-[62vh] m-0 overflow-hidden border border-line rounded-t-2xl bg-panel "
         aria-labelledby="log-title"
       >
         <div className="w-full border-b border-line bg-transparent text-text p-4">
