@@ -130,7 +130,7 @@ export function AppShell() {
           {/* <h1 className="text-3xl font-semibold text-text mb-6 tracking-widest">
               GAME ID
             </h1> */}
-          <AppIdEntry onSubmit={inspectApp} isLoading={isPending} />
+          <AppIdEntry onSubmit={inspectApp} isLoading={isPending} isSplash />
         </div>
 
         <SettingsPanel

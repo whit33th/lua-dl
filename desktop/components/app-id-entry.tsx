@@ -11,12 +11,14 @@ type AppIdEntryProps = {
   onSubmit(appId: string): void;
   isLoading: boolean;
   disabled?: boolean;
+  isSplash?: boolean;
 };
 
 export function AppIdEntry({
   onSubmit,
   isLoading,
   disabled,
+  isSplash,
 }: AppIdEntryProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -159,7 +161,10 @@ export function AppIdEntry({
           />
           <div
             ref={scrollContainerRef}
-            className="border-line absolute top-full left-0 z-50 mt-2 w-full max-h-72 overflow-y-auto rounded-b-xl border bg-black/80 p-2 shadow-2xl backdrop-blur-xl"
+            className={cn(
+              "border-line absolute top-full left-0 z-50 mt-2 w-full max-h-72 overflow-y-auto rounded-b-xl border p-2 shadow-2xl backdrop-blur-xl",
+              isSplash ? "bg-black/60" : "bg-black/80",
+            )}
           >
             {results.map((result, index) => (
               <button
