@@ -56,7 +56,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="border border-line rounded-lg flex-1 h-full bg-panel shadow-lg p-5"
+      className="border border-line rounded-2xl flex-1 h-full bg-panel shadow-lg p-5"
       aria-labelledby="download-title"
     >
       <div className="flex items-center justify-between gap-4 mb-5">
@@ -69,7 +69,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
           </h2>
         </div>
         <button
-          className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-lg px-4 py-2.75 font-bold disabled:cursor-not-allowed disabled:opacity-42"
+          className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-2xl px-4 py-2.75 font-bold disabled:cursor-not-allowed disabled:opacity-42"
           type="button"
           disabled={!canDownload}
           onClick={() => void onDownload(buildDownloadArgs())}
@@ -80,7 +80,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
       </div>
 
       <div className="grid grid-cols-[minmax(180px,240px)_minmax(0,1fr)] gap-3 my-5">
-        <label className="flex items-center gap-3 min-h-14.5 border border-line rounded-lg bg-black p-3">
+        <label className="flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3">
           <input
             type="checkbox"
             checked={downloadAll}
@@ -95,7 +95,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
         </label>
 
         <button
-          className="w-full flex items-center gap-3 min-h-14.5 border border-line rounded-lg bg-black p-3 text-left text-text transition-all hover:border-text hover:-translate-y-0.5"
+          className="w-full flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3 text-left text-text transition-all hover:border-text hover:-translate-y-0.5"
           type="button"
           onClick={chooseDirectory}
         >
@@ -108,14 +108,11 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
       <div className="max-h-65 overflow-auto pr-1" aria-label="Depot selection">
         {cli.depots.length === 0 ? (
-          <div className="flex items-center gap-2.5 min-h-18 text-muted">
-            <RotateCcw size={18} aria-hidden="true" />
-            <span>Choices appear after App ID inspection.</span>
-          </div>
+          null
         ) : (
           cli.depots.map((depot) => (
             <label
-              className="flex items-center gap-3 min-h-14.5 border border-line rounded-lg bg-black p-3 transition-all mb-2 last:mb-0"
+              className="flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3 transition-all mb-2 last:mb-0"
               key={depot.id}
               data-kind={depot.kind}
               style={{

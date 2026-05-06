@@ -25,10 +25,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
   }
 
   return (
-    <form
-      className="relative grid grid-cols-[1fr_58px] gap-2.5"
-      onSubmit={handleSubmit}
-    >
+    <form className="relative flex w-full gap-2.5 border-b" onSubmit={handleSubmit} >
       <label className="sr-only" htmlFor="app-id">
         Steam App ID
       </label>
@@ -36,18 +33,18 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         id="app-id"
         inputMode="numeric"
         pattern="[0-9]*"
-        placeholder="431960"
+        placeholder="Paste Game ID [e.g. 570123]"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? "app-id-error" : undefined}
-        className="h-14 min-w-0 border border-line-strong rounded-lg bg-black text-text px-4.5 text-2xl font-bold"
+        className="h-14 w-full min-w-0   bg-black text-text px-4.5 text-2xl font-bold"
       />
       <button
         type="submit"
         aria-label="Inspect App ID"
         disabled={isLoading}
-        className="border border-line-strong rounded-lg bg-panel-strong text-text transition-all hover:border-text hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-42 grid place-items-center"
+        className=" bg-panel-strong w-14 text-text transition-all hover:border-text hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-42 grid place-items-center"
       >
         {isLoading ? (
           <Loader2 className="animate-spin" size={20} aria-hidden="true" />

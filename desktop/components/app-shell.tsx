@@ -105,7 +105,7 @@ export function AppShell() {
       >
         <div className="flex gap-2.5">
           <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-lg bg-text text-panel-strong transition-all hover:-translate-y-0.5"
+            className="w-11 h-11 grid place-items-center border border-line-strong rounded-2xl bg-text text-panel-strong transition-all hover:-translate-y-0.5"
             type="button"
             onClick={stopActiveSession}
             aria-label="Stop process"
@@ -115,25 +115,12 @@ export function AppShell() {
         </div>
       </section> */}
 
-      <section
-        className="grid grid-cols-[minmax(180px,0.35fr)_minmax(320px,1fr)] gap-6 items-end mb-4 rounded-lg bg-panel shadow-lg p-5.5"
-        aria-labelledby="app-id-title"
-      >
-        <div>
-          <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
-            Steam App ID
-          </p>
-          <h2 id="app-id-title" className="m-0 text-2xl font-bold">
-            Start with an ID
-          </h2>
-        </div>
-        <AppIdEntry
-          onSubmit={inspectApp}
-          isLoading={mode === "probing" || isPending}
-        />
-      </section>
+      <AppIdEntry
+        onSubmit={inspectApp}
+        isLoading={mode === "probing" || isPending}
+      />
 
-      <section className="flex h-full flex-1 gap-4">
+      <section className="flex h-full flex-1 gap-4 px-4">
         <div className="grid min-h-0 grid-rows-2 gap-4 w-full">
           <DownloadWorkflow onDownload={startDownload} />
 
@@ -144,8 +131,8 @@ export function AppShell() {
           className="grid min-h-0 gap-4 flex-1/3 min-w-50 max-w-125"
           aria-label="Session details"
         >
-          <div className="grid min-h-0 h-full  gap-3.5 p-3.5 border border-line rounded-lg bg-panel shadow-lg">
-            <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-lg bg-black">
+          <div className="grid min-h-0 h-full  gap-3.5 p-3.5 border border-line rounded-2xl bg-panel shadow-lg">
+            <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-2xl bg-black">
               {metadata?.headerImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -172,7 +159,7 @@ export function AppShell() {
 
           {cli.lastError ? (
             <div
-              className="flex gap-2.5 p-3.5 bg-text text-panel-strong font-bold border border-line rounded-lg"
+              className="flex gap-2.5 p-3.5 bg-text text-panel-strong font-bold border border-line rounded-2xl"
               role="alert"
             >
               <AlertCircle size={18} aria-hidden="true" />

@@ -29,7 +29,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
       <aside
-        className="w-[min(560px,100%)] max-h-screen border border-line rounded-lg bg-panel shadow-lg p-5 flex flex-col"
+        className="w-[min(560px,100%)] max-h-screen border border-line rounded-2xl bg-panel shadow-lg p-5 flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
@@ -44,7 +44,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </h2>
           </div>
           <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-lg bg-panel-strong text-text transition-all hover:border-text hover:-translate-y-0.5"
+            className="w-11 h-11 grid place-items-center border border-line-strong rounded-2xl bg-panel-strong text-text transition-all hover:border-text hover:-translate-y-0.5"
             type="button"
             onClick={onClose}
             aria-label="Close settings"
@@ -54,7 +54,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </div>
 
         <div className="grid gap-2.5 flex-1">
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-lg bg-black p-3">
+          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-2xl bg-black p-3">
             <span>
               <strong className="block text-sm">Verbose logging</strong>
               <small className="block text-muted text-xs mt-0.75">
@@ -69,7 +69,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             />
           </label>
 
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-lg bg-black p-3">
+          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-2xl bg-black p-3">
             <span>
               <strong className="block text-sm">Keep raw logs</strong>
               <small className="block text-muted text-xs mt-0.75">
@@ -84,7 +84,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             />
           </label>
 
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-lg bg-black p-3">
+          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-2xl bg-black p-3">
             <span>
               <strong className="block text-sm">Compact density</strong>
               <small className="block text-muted text-xs mt-0.75">
@@ -102,7 +102,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </label>
 
           <button
-            className="w-full text-left border border-line rounded-lg bg-black p-3 text-text transition-all hover:border-text hover:-translate-y-0.5 overflow-hidden text-ellipsis whitespace-nowrap"
+            className="w-full text-left border border-line rounded-2xl bg-black p-3 text-text transition-all hover:border-text hover:-translate-y-0.5 overflow-hidden text-ellipsis whitespace-nowrap"
             type="button"
             onClick={chooseDirectory}
           >

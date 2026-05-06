@@ -37,7 +37,7 @@ export function PromptModal() {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
       <div
-        className="w-[min(560px,100%)] border border-line rounded-lg bg-panel shadow-lg p-5"
+        className="w-[min(560px,100%)] border border-line rounded-2xl bg-panel shadow-lg p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="prompt-title"
@@ -49,14 +49,14 @@ export function PromptModal() {
         <h2 id="prompt-title" className="m-0 text-2xl font-bold mb-3.5">
           {prompt.kind === "picker" ? "Choose in CLI picker" : "Continue"}
         </h2>
-        <pre className="max-h-65 overflow-auto border border-line rounded-lg bg-black p-3.5 whitespace-pre-wrap text-muted font-mono text-xs">
+        <pre className="max-h-65 overflow-auto border border-line rounded-2xl bg-black p-3.5 whitespace-pre-wrap text-muted font-mono text-xs">
           {prompt.text}
         </pre>
 
         {prompt.kind === "yes-no" ? (
           <div className="flex flex-wrap gap-2.5 mt-3.5">
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-lg px-4 py-2.75 font-bold"
+              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-2xl px-4 py-2.75 font-bold"
               type="button"
               onClick={() => write("y\r")}
             >
@@ -64,7 +64,7 @@ export function PromptModal() {
               Yes
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-black border border-line-strong text-text hover:-translate-y-0.5 transition-transform rounded-lg px-4 py-2.75 font-bold"
+              className="inline-flex items-center justify-center gap-2.25 bg-black border border-line-strong text-text hover:-translate-y-0.5 transition-transform rounded-2xl px-4 py-2.75 font-bold"
               type="button"
               onClick={() => write("n\r")}
             >
@@ -75,7 +75,7 @@ export function PromptModal() {
         ) : prompt.kind === "picker" ? (
           <div className="flex flex-wrap gap-2.5 mt-3.5">
             <button
-              className="min-h-10.5 border border-line-strong rounded-lg bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="min-h-10.5 border border-line-strong rounded-2xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
               type="button"
               onClick={() => write("\u001b[A")}
               aria-label="Move selection up"
@@ -83,7 +83,7 @@ export function PromptModal() {
               <ArrowUp size={17} aria-hidden="true" />
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-lg bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="min-h-10.5 border border-line-strong rounded-2xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
               type="button"
               onClick={() => write("\u001b[B")}
               aria-label="Move selection down"
@@ -91,28 +91,28 @@ export function PromptModal() {
               <ArrowDown size={17} aria-hidden="true" />
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-lg bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="min-h-10.5 border border-line-strong rounded-2xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
               type="button"
               onClick={() => write(" ")}
             >
               Toggle
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-lg bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="min-h-10.5 border border-line-strong rounded-2xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
               type="button"
               onClick={() => write("a")}
             >
               All
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-lg bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="min-h-10.5 border border-line-strong rounded-2xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
               type="button"
               onClick={() => write("n")}
             >
               None
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-lg px-4 py-2.75 font-bold"
+              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-2xl px-4 py-2.75 font-bold"
               type="button"
               onClick={() => write("\r")}
             >
@@ -128,10 +128,10 @@ export function PromptModal() {
               value={textValue}
               onChange={(event) => setTextValue(event.target.value)}
               autoFocus
-              className="min-w-0 border border-line-strong rounded-lg bg-black text-text px-3 py-2"
+              className="min-w-0 border border-line-strong rounded-2xl bg-black text-text px-3 py-2"
             />
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-lg px-4 py-2.75 font-bold"
+              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-2xl px-4 py-2.75 font-bold"
               type="submit"
             >
               Send

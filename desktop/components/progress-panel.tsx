@@ -22,7 +22,7 @@ export function ProgressPanel() {
 
   return (
     <section
-      className="border border-line rounded-lg bg-panel shadow-lg p-5"
+      className="border border-line rounded-2xl bg-panel shadow-lg p-5"
       aria-labelledby="progress-title"
     >
       <div className="flex items-start justify-between gap-4 mb-5">
@@ -57,17 +57,17 @@ export function ProgressPanel() {
       </div>
 
       <dl className="grid grid-cols-4 gap-2.5">
-        <div className="border border-line rounded-lg bg-panel-strong p-3">
+        <div className="border border-line rounded-2xl bg-panel-strong p-3">
           <dt className="text-dim text-xs">Progress</dt>
           <dd className="mt-1.25 font-bold">{percent.toFixed(1)}%</dd>
         </div>
-        <div className="border border-line rounded-lg bg-panel-strong p-3">
+        <div className="border border-line rounded-2xl bg-panel-strong p-3">
           <dt className="text-dim text-xs">Speed</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
           </dd>
         </div>
-        <div className="border border-line rounded-lg bg-panel-strong p-3">
+        <div className="border border-line rounded-2xl bg-panel-strong p-3">
           <dt className="text-dim text-xs">Files</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.filesTotal
@@ -75,7 +75,7 @@ export function ProgressPanel() {
               : "0/0"}
           </dd>
         </div>
-        <div className="border border-line rounded-lg bg-panel-strong p-3">
+        <div className="border border-line rounded-2xl bg-panel-strong p-3">
           <dt className="text-dim text-xs">Downloaded</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.totalMb
