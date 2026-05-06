@@ -1,10 +1,10 @@
 "use client";
 import { Minus, Settings, Square, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 import FrameButton from "./frame-btn";
+import ASCIIText from "./ASCIIText";
 
 export default function Frame() {
   return (
@@ -15,6 +15,7 @@ export default function Frame() {
       <div className="ml-2 flex items-center gap-2">
         {/* <Image src="/imgs/logo.png" alt="Logo" width={18} height={18} /> */}
         <div className="size-4 bg-black"></div>
+
       </div>
 
       <div

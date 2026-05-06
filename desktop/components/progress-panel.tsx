@@ -26,7 +26,7 @@ export function ProgressPanel() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 id="progress-title" className="m-0 text-xl font-bold text-text truncate">
-            {cli.phase ??   "Status"}
+            {cli.phase ?? "Status"}
           </h2>
           <div
             className="flex items-center gap-1.5 text-muted text-sm capitalize"
@@ -52,21 +52,21 @@ export function ProgressPanel() {
             aria-valuenow={percent}
           >
             <span
-              className="block h-full bg-text transition-all duration-500 shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              className="block h-full bg-text transition-[width] duration-500 shadow-[0_0_8px_rgba(255,255,255,0.3)]"
               style={{ width: `${percent}%` }}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2 mt-2">
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
             <span className="text-[10px] font-bold uppercase text-dim">Speed</span>
             <span className="text-sm font-bold text-text">
               {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
             <span className="text-[10px] font-bold uppercase text-dim">Files</span>
             <span className="text-sm font-bold text-text">
               {progress?.filesTotal
@@ -75,7 +75,7 @@ export function ProgressPanel() {
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
             <span className="text-[10px] font-bold uppercase text-dim">Downloaded</span>
             <span className="text-sm font-bold text-text">
               {progress?.totalMb
@@ -86,11 +86,11 @@ export function ProgressPanel() {
         </div>
       </div>
 
-      {cli.doneMessage ? (
+      {/* {cli.doneMessage ? (
         <div className="mt-auto p-3 border border-line bg-white/5 text-xs text-text/80 leading-relaxed">
           {cli.doneMessage}
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

@@ -23,11 +23,11 @@ export default function SkinCard({
   const splashUrl =
     typeof skinNum === "number" && skinNum > 0
       ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${encodeURIComponent(
-          championKey,
-        )}_${skinNum}.jpg`
+        championKey,
+      )}_${skinNum}.jpg`
       : `https://ddragon.leagueoflegends.com/cdn/15.20.1/img/champion/${encodeURIComponent(
-          championKey,
-        )}.png`;
+        championKey,
+      )}.png`;
 
   return (
     <div className="group relative aspect-[2/3] border border-white/10 bg-gradient-to-b from-transparent to-black/20">
@@ -82,10 +82,10 @@ function Details({ skinName }: { skinName?: string }) {
 export function Border() {
   return (
     <>
-      <figure className="absolute top-0 left-0 h-1 w-1 origin-top-left -translate-x-1/2 -translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
-      <figure className="absolute top-0 right-0 h-1 w-1 origin-top-right translate-x-1/2 -translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
-      <figure className="translate-y/1/2 absolute right-0 bottom-0 h-1 w-1 origin-bottom-right translate-x-1/2 translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
-      <figure className="absolute bottom-0 left-0 h-1 w-1 origin-bottom-left -translate-x-1/2 translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
+      <figure className="absolute top-0 left-0 h-1 w-1 origin-top-left -translate-x-1/2 -translate-y-1/2 bg-white/80  " />
+      <figure className="absolute top-0 right-0 h-1 w-1 origin-top-right translate-x-1/2 -translate-y-1/2 bg-white/80  " />
+      <figure className="translate-y/1/2 absolute right-0 bottom-0 h-1 w-1 origin-bottom-right translate-x-1/2 translate-y-1/2 bg-white/80  " />
+      <figure className="absolute bottom-0 left-0 h-1 w-1 origin-bottom-left -translate-x-1/2 translate-y-1/2 bg-white/80  " />
     </>
   );
 }

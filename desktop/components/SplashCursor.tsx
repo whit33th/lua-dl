@@ -59,7 +59,7 @@ export default function SplashCursor({
   DYE_RESOLUTION = 1440,
   CAPTURE_RESOLUTION = 512,
   DENSITY_DISSIPATION = 3.5,
-  VELOCITY_DISSIPATION = 2,
+  VELOCITY_DISSIPATION = 2.5,
   PRESSURE = 0.1,
   PRESSURE_ITERATIONS = 20,
   CURL = 3,
@@ -1301,7 +1301,7 @@ export default function SplashCursor({
   ]);
 
   return (
-    <div className="fixed top-0 left-0 z-50 pointer-events-none w-full h-full">
+    <div className="fixed top-0 left-0 z-9 pointer-events-none w-full h-full">
       <canvas ref={canvasRef} id="fluid" className="w-screen h-screen block"></canvas>
     </div>
   );

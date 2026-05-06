@@ -36,7 +36,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         id="app-id"
         inputMode="numeric"
         pattern="[0-9]*"
-        placeholder="Paste Game ID [e.g. 570123]"
+        placeholder="Steam Game ID"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         aria-invalid={Boolean(error)}
@@ -47,7 +47,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         type="submit"
         aria-label="Inspect App ID"
         disabled={isLoading || !value}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-text text-black w-12 h-12 rounded-lg transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-42 disabled:hover:scale-100 grid place-items-center"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-text text-black w-12 h-12 rounded-lg transition-[scale,opacity,background-color] hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-42 disabled:hover:scale-100 grid place-items-center"
       >
         {isLoading ? (
           <Loader2 className="animate-spin" size={20} aria-hidden="true" />

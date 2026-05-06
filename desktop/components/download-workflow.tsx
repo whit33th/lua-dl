@@ -58,13 +58,13 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="border border-line flex-1 h-full bg-panel-strong/40 backdrop-blur-sm p-5 relative overflow-hidden"
+      className="flex-1 h-full p-5 relative"
       aria-labelledby="download-title"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex gap-2">
-          <label 
-            className={`flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 transition-all hover:bg-black/80 cursor-pointer ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
+          <label
+            className={`flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 transition-[color,background-color,border-color,opacity] hover:bg-black/80 cursor-pointer ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
             title="All optional content"
           >
             <input
@@ -77,7 +77,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
           </label>
 
           <button
-            className="flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 text-text transition-all hover:bg-black/80 cursor-pointer"
+            className="flex opacity-80 hover:opacity-100 items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 text-text transition-[opacity,background-color,border-color] hover:bg-black/80 cursor-pointer"
             type="button"
             title={settings.outputDir || "Default folder"}
             onClick={chooseDirectory}
@@ -85,9 +85,9 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
             <FolderOpen size={18} />
           </button>
         </div>
-        
+
         <button
-          className="inline-flex items-center justify-center gap-2 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform rounded-lg px-4 py-2 font-bold disabled:cursor-not-allowed disabled:opacity-42"
+          className="inline-flex  items-center justify-center gap-2 bg-text text-panel-strong  transition-transform rounded-lg px-4 py-2 font-bold disabled:cursor-not-allowed disabled:opacity-42"
           type="button"
           disabled={!canDownload}
           onClick={() => void onDownload(buildDownloadArgs())}
@@ -97,16 +97,18 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
         </button>
       </div>
 
-      <div 
-        className="max-h-[calc(100%-4rem)] overflow-y-auto pr-1 transition-all"
+      <div
+        className="max-h-[calc(100%-4rem)] relative overflow-y-auto pr-1 transition-opacity"
         style={{ opacity: downloadAll ? 0.4 : 1, pointerEvents: downloadAll ? 'none' : 'auto' }}
       >
+
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" aria-label="Depot selection">
+
           {cli.depots.length > 0 && cli.depots
             .filter(depot => depot.kind !== "core")
             .map((depot) => (
               <label
-                className="flex flex-col items-start gap-2 border border-line rounded-xl bg-black/40 p-2.5 transition-all cursor-pointer hover:bg-black/60"
+                className="flex flex-col items-start gap-2 border border-line rounded-xl bg-black/40 p-2.5 transition-[background-color,border-color] cursor-pointer hover:bg-black/60"
                 key={depot.id}
                 data-kind={depot.kind}
               >
@@ -120,7 +122,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
                   />
                   <DepotIcon kind={depot.kind} />
                 </div>
-                
+
                 <div className="flex-1 w-full flex flex-col justify-end">
                   <div className="flex justify-between items-center w-full">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-text/90">
@@ -133,7 +135,10 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
                 </div>
               </label>
             ))}
+
         </div>
+        <div className="sticky bottom-0 left-0 w-full h-6 bg-linear-to-t z-10 from-black to-transparent" />
+
       </div>
     </section>
   );

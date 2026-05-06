@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { AlertCircle, Download, Settings2, Square } from "lucide-react";
+import { AlertCircle, Download, Gamepad2, Settings2, Square } from "lucide-react";
 import { AppIdEntry } from "./app-id-entry";
 import { DownloadWorkflow } from "./download-workflow";
 import { CliFeed } from "./cli-feed";
@@ -17,6 +17,7 @@ import ASCIIText from "./ASCIIText";
 import Noise from "./Noise";
 import ShinyText from "./ShinyText";
 import Image from "next/image";
+import SplashCursor from "./SplashCursor";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -107,7 +108,9 @@ export function AppShell() {
 
   if (isIdle) {
     return (
-      <main className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center gap-12 z-0">
+      <div className="relative w-full h-full flex flex-col items-center justify-center  z-0">
+
+        <SplashCursor />
         <Noise
           patternSize={250}
           patternScaleX={1}
@@ -123,30 +126,27 @@ export function AppShell() {
             textFontSize={160}
           />
         </div>
-        {/* <SplashCursor /> */}
 
-        <div className="z-10 flex flex-col items-center gap-6 w-full max-w-lg mx-auto relative mt-48">
-          <div className="text-center w-full bg-black/60 backdrop-blur-md p-8 rounded-3xl border border-line-strong shadow-2xl">
-            <h1 className="text-3xl font-bold text-text mb-6 tracking-widest uppercase">
-              <ShinyText text="ENTER GAME ID" disabled={false} speed={2} className="text-white" />
-            </h1>
-            <AppIdEntry
-              onSubmit={inspectApp}
-              isLoading={isPending}
-            />
-          </div>
+        <div className="text-center w-full z-10 max-w-lg mx-auto bg-black/60 backdrop-blur-lg p-6 rounded border border-line-strong shadow-2xl">
+          {/* <h1 className="text-3xl font-semibold text-text mb-6 tracking-widest">
+              GAME ID
+            </h1> */}
+          <AppIdEntry
+            onSubmit={inspectApp}
+            isLoading={isPending}
+          />
         </div>
 
         <SettingsPanel
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />
-      </main>
+      </div>
     );
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col pt-8 z-0">
+    <div className="relative w-full h-full flex flex-col pt-8 z-0">
       {/* <SplashCursor /> */}
       <div className="px-6 pb-6 z-10 w-full max-w-3xl mx-auto">
         <AppIdEntry
@@ -155,21 +155,23 @@ export function AppShell() {
         />
       </div>
 
-      <section className="flex h-full flex-1 gap-4 px-6 pb-6 z-10 overflow-hidden">
+      <section className="flex h-full flex-1 gap-4 px-6 pt-1 pb-6 z-10 overflow-hidden">
         <div className="flex flex-col gap-4 flex-1 min-w-0">
           {/* Top Section: Game Metadata */}
-          <div className="relative flex-none h-48 border border-line bg-panel-strong/40 backdrop-blur-sm overflow-hidden group">
+          <div className="relative flex-none h-48 border border-line backdrop-blur-sm group">
             <Border />
-            {metadata?.headerImage && (
-              <Image
-                src={metadata.headerImage}
-                fill
-                alt=""
-                className="object-cover opacity-50 grayscale blur-xl group-hover:grayscale-0 group-hover:opacity-70 transition-[filter, opacity] duration-100"
-              />
-            )}
+            <div className="absolute inset-0 overflow-hidden">
+              {metadata?.headerImage && (
+                <Image
+                  src={metadata.headerImage}
+                  fill
+                  alt=""
+                  className="object-cover opacity-50 grayscale blur-xl group-hover:grayscale-0 group-hover:opacity-70 transition-[filter,opacity] ease-in-out duration-150"
+                />
+              )}
+            </div>
             <div className="relative h-full flex items-center gap-6 p-4">
-              <div className="w-48 aspect-video relative flex-none border border-line rounded-xs bg-black overflow-hidden shadow-2xl">
+              <div className="h-full w-auto aspect-video relative flex-none border border-line  bg-black overflow-hidden shadow-2xl">
                 {metadata?.headerImage ? (
                   <Image
                     src={metadata.headerImage}
@@ -178,8 +180,8 @@ export function AppShell() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-white/5">
-                    <Download size={48} className="text-white/20" />
+                  <div className="w-full z-11 h-full flex items-center justify-center  bg-white/5">
+                    <Gamepad2 size={48} className="text-white/20" />
                   </div>
                 )}
               </div>
@@ -188,8 +190,8 @@ export function AppShell() {
                   <ShinyText text={metadata?.name ?? "Waiting"} disabled={false} speed={3} />
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 border border-line rounded text-xs font-bold uppercase text-muted bg-white/5">
-                    {metadata?.isFallback ? "Metadata unavailable" : (metadata?.type ?? "Ready")}
+                  <span className="px-2 py-0.5 border border-line rounded  text-xs font-bold  uppercase text-muted bg-black/90">
+                    {metadata?.isFallback ? "Nope." : (metadata?.type ?? "Ready")}
                   </span>
                 </div>
               </div>
@@ -197,7 +199,7 @@ export function AppShell() {
           </div>
 
           {/* Bottom Section: Workflow */}
-          <div className="relative flex-1 min-h-0">
+          <div className="relative flex-1 min-h-0 border border-line">
             <Border />
             <DownloadWorkflow onDownload={startDownload} />
           </div>
@@ -207,8 +209,9 @@ export function AppShell() {
           className="flex-none w-80 flex flex-col gap-4 relative"
           aria-label="Progress and Status"
         >
-          <Border />
-          <div className="flex flex-col flex-1 p-5 border border-line bg-panel-strong/40 backdrop-blur-sm overflow-hidden">
+          <div className="flex flex-col flex-1 p-5 border border-line relative">
+            <Border />
+
             <ProgressPanel />
           </div>
 

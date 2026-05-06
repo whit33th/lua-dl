@@ -44,7 +44,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </h2>
           </div>
           <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-panel-strong text-text transition-all hover:border-text hover:-translate-y-0.5"
+            className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-panel-strong text-text transition-[border-color,translate,background-color,color] hover:border-text hover:-translate-y-0.5"
             type="button"
             onClick={onClose}
             aria-label="Close settings"
@@ -102,7 +102,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </label>
 
           <button
-            className="w-full text-left border border-line rounded-4xl bg-black p-3 text-text transition-all hover:border-text hover:-translate-y-0.5 overflow-hidden text-ellipsis whitespace-nowrap"
+            className="w-full text-left border border-line rounded-4xl bg-black p-3 text-text transition-[border-color,translate,background-color,color] hover:border-text hover:-translate-y-0.5 overflow-hidden text-ellipsis whitespace-nowrap"
             type="button"
             onClick={chooseDirectory}
           >

@@ -49,7 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
   logs: [],
   cli: defaultCliState,
   selectedDepots: [],
-  downloadAll: false,
+  downloadAll: true,
   settings: {
     outputDir: "",
     verbose: false,
