@@ -21,6 +21,14 @@ export type DesktopSettings = {
   density: "comfortable" | "compact";
 };
 
+export type QueueItem = {
+  id: string;
+  appId: string;
+  metadata: SteamMetadata;
+  args: string[];
+  status: "pending" | "downloading" | "finished" | "failed";
+};
+
 type AppState = {
   mode: WorkflowMode;
   appId: string;
@@ -31,6 +39,7 @@ type AppState = {
   selectedDepots: string[];
   downloadAll: boolean;
   settings: DesktopSettings;
+  queue: QueueItem[];
   setAppId(appId: string): void;
   setMetadata(metadata?: SteamMetadata): void;
   setMode(mode: WorkflowMode): void;
@@ -43,6 +52,12 @@ type AppState = {
   setVerbose(value: boolean): void;
   setKeepRawLogs(value: boolean): void;
   setDensity(value: DesktopSettings["density"]): void;
+  addToQueue(item: Omit<QueueItem, "id" | "status">): void;
+  removeFromQueue(id: string): void;
+  updateQueueStatus(id: string, status: QueueItem["status"]): void;
+  clearQueue(): void;
+  killedSessionIds: string[];
+  killActiveSession(): void;
 };
 
 const defaultCliState: ParsedCliState = {
@@ -62,12 +77,23 @@ export const useAppStore = create<AppState>((set) => ({
     keepRawLogs: true,
     density: "comfortable",
   },
+  queue: [],
+  killedSessionIds: [],
   setAppId: (appId) => set({ appId }),
   setMetadata: (metadata) => set({ metadata }),
   setMode: (mode) => set({ mode }),
   setActiveSession: (activeSessionId) => set({ activeSessionId }),
   ingestEvent: (event) =>
     set((state) => {
+      // Ignore events from explicitly killed sessions
+      if (state.killedSessionIds.includes(event.sessionId)) {
+        return state;
+      }
+      // Ignore events from background sessions
+      if (state.activeSessionId && event.sessionId !== state.activeSessionId) {
+        return state;
+      }
+
       const log = cliEventToLog(event);
       const cli = reduceCliState(state.cli, event);
       const depots = cli.depots;
@@ -92,6 +118,19 @@ export const useAppStore = create<AppState>((set) => ({
       selectedDepots: [],
       activeSessionId: undefined,
     }),
+  killActiveSession: () =>
+    set((state) => {
+      if (state.activeSessionId) {
+        return {
+          killedSessionIds: [...state.killedSessionIds, state.activeSessionId],
+          logs: [],
+          cli: defaultCliState,
+          selectedDepots: [],
+          activeSessionId: undefined,
+        };
+      }
+      return state;
+    }),
   toggleDepot: (depotId) =>
     set((state) => ({
       selectedDepots: state.selectedDepots.includes(depotId)
@@ -115,6 +154,28 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       settings: { ...state.settings, density },
     })),
+  addToQueue: (item) =>
+    set((state) => ({
+      queue: [
+        ...state.queue,
+        {
+          ...item,
+          id: crypto.randomUUID(),
+          status: "pending",
+        },
+      ],
+    })),
+  removeFromQueue: (id) =>
+    set((state) => ({
+      queue: state.queue.filter((item) => item.id !== id),
+    })),
+  updateQueueStatus: (id, status) =>
+    set((state) => ({
+      queue: state.queue.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    })),
+  clearQueue: () => set({ queue: [] }),
 }));
 
 function ensureDepotSelection(selected: string[], depots: DepotOption[]) {
@@ -135,6 +196,10 @@ function ensureDepotSelection(selected: string[], depots: DepotOption[]) {
 
 function inferMode(current: WorkflowMode, event: CliEvent): WorkflowMode {
   if (event.type === "exit") {
+    // Treat process termination via kill as intentional stop, not failure
+    if (event.exitCode === -1073741510 || event.exitCode === -1) {
+      return current;
+    }
     if (event.exitCode !== 0) {
       return "failed";
     }

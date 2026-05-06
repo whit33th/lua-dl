@@ -28,12 +28,17 @@ export function AppShell() {
   const activeSessionId = useAppStore((state) => state.activeSessionId);
   const settings = useAppStore((state) => state.settings);
   const cli = useAppStore((state) => state.cli);
+  const queue = useAppStore((state) => state.queue);
   const setAppId = useAppStore((state) => state.setAppId);
   const setMetadata = useAppStore((state) => state.setMetadata);
   const setMode = useAppStore((state) => state.setMode);
   const setActiveSession = useAppStore((state) => state.setActiveSession);
   const clearRun = useAppStore((state) => state.clearRun);
   const ingestEvent = useAppStore((state) => state.ingestEvent);
+  const addToQueue = useAppStore((state) => state.addToQueue);
+  const updateQueueStatus = useAppStore((state) => state.updateQueueStatus);
+  const removeFromQueue = useAppStore((state) => state.removeFromQueue);
+  const killActiveSession = useAppStore((state) => state.killActiveSession);
 
   useEffect(() => {
     return window.luaDl?.onEvent((event) => {
@@ -88,21 +93,121 @@ export function AppShell() {
 
   const startDownload = useCallback(
     async (args: string[]) => {
+      if (!metadata) return;
+      addToQueue({
+        appId,
+        metadata,
+        args,
+      });
+      // If idle, the orchestrator will pick it up
+    },
+    [appId, metadata, addToQueue],
+  );
+
+  const startDownloadFromQueue = useCallback(
+    async (item: any) => {
       clearRun();
       setMode("downloading");
-      await startSession(args, `Download ${appId}`).catch(() => {
+      setAppId(item.appId);
+      setMetadata(item.metadata);
+      updateQueueStatus(item.id, "downloading");
+      await startSession(item.args, `Download ${item.appId}`).catch(() => {
+        updateQueueStatus(item.id, "failed");
         setMode("failed");
       });
     },
-    [appId, clearRun, setMode, startSession],
+    [clearRun, setAppId, setMetadata, setMode, startSession, updateQueueStatus],
   );
 
   const stopActiveSession = useCallback(() => {
     if (activeSessionId) {
       void window.luaDl?.kill(activeSessionId);
-      setActiveSession(undefined);
+      killActiveSession(); // Fully clears cli state, marks session as killed
     }
-  }, [activeSessionId, setActiveSession]);
+
+    // Always try to remove the active (first) item from the queue
+    if (queue.length > 0) {
+      removeFromQueue(queue[0].id);
+    }
+    setMode("idle");
+    setAppId("");
+    setMetadata(undefined);
+  }, [
+    activeSessionId,
+    killActiveSession,
+    queue,
+    removeFromQueue,
+    setMode,
+    setAppId,
+    setMetadata,
+  ]);
+
+  // Queue orchestrator
+  useEffect(() => {
+    // 1. Mark active item as finished/failed if mode changes
+    if (mode === "finished" || mode === "failed") {
+      const activeItem = queue.find((item) => item.status === "downloading");
+      if (activeItem) {
+        updateQueueStatus(
+          activeItem.id,
+          mode === "finished" ? "finished" : "failed",
+        );
+        // Important: transition to idle so next item can pick up
+        if (mode === "finished") {
+          setTimeout(() => {
+            setMode("idle");
+            setAppId("");
+            setMetadata(undefined);
+          }, 2000); // Small delay to see the finish status
+        }
+      }
+    }
+
+    // 2. Start next pending item if nothing is downloading
+    const currentlyDownloading = queue.find(
+      (item) => item.status === "downloading",
+    );
+    const canStartNext =
+      mode === "idle" ||
+      mode === "ready" ||
+      mode === "finished";
+
+    if (!currentlyDownloading && canStartNext) {
+      const nextItem = queue.find((item) => item.status === "pending");
+      if (nextItem) {
+        void startDownloadFromQueue(nextItem);
+      }
+    }
+
+    // If we are in failed state, and the failed item was removed from the queue, reset to idle
+    if (mode === "failed") {
+      const hasFailedItemInQueue = queue.some((item) => item.status === "failed");
+      if (!hasFailedItemInQueue) {
+        setMode("idle");
+        setAppId("");
+        setMetadata(undefined);
+      }
+    }
+
+
+    // 3. If something IS downloading but it's NO LONGER in the queue, stop it!
+    if (mode === "downloading" && activeSessionId) {
+      const isStillInQueue = queue.some((item) => item.status === "downloading");
+      if (!isStillInQueue) {
+        stopActiveSession();
+      }
+    }
+  }, [
+    mode,
+    queue,
+    activeSessionId,
+    startDownloadFromQueue,
+    updateQueueStatus,
+    stopActiveSession,
+    setMode,
+    setAppId,
+    setMetadata,
+  ]);
 
   const isIdle = mode === "idle" && !appId;
 
@@ -148,7 +253,7 @@ export function AppShell() {
         <AppIdEntry
           onSubmit={inspectApp}
           isLoading={mode === "probing" || isPending}
-          disabled={mode === "downloading"}
+          disabled={false}
         />
       </div>
 
@@ -161,7 +266,8 @@ export function AppShell() {
               {metadata?.headerImage && (
                 <Image
                   src={metadata.headerImage}
-                  fill
+                  width={460}
+                  height={215}
                   alt=""
                   className={cn(
                     "object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
@@ -173,11 +279,12 @@ export function AppShell() {
               )}
             </div>
             <div className="relative flex h-full items-center gap-6 p-4">
-              <div className="border-line relative aspect-video h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
+              <div className="border-line relative aspect-92/43 h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
                 {metadata?.headerImage ? (
                   <Image
                     src={metadata.headerImage}
-                    fill
+                    width={460}
+                    height={215}
                     alt=""
                     className="object-cover"
                   />

@@ -9,6 +9,7 @@ import {
   Package,
   PackageCheck,
   Play,
+  Plus,
   Square,
 } from "lucide-react";
 
@@ -30,9 +31,10 @@ export function DownloadWorkflow({
   const toggleDepot = useAppStore((state) => state.toggleDepot);
   const setDownloadAll = useAppStore((state) => state.setDownloadAll);
   const setOutputDir = useAppStore((state) => state.setOutputDir);
+  const queue = useAppStore((state) => state.queue);
+  const removeFromQueue = useAppStore((state) => state.removeFromQueue);
 
-  const canDownload =
-    Boolean(appId) && mode !== "probing" && mode !== "downloading";
+  const canDownload = Boolean(appId) && mode !== "probing";
 
   async function chooseDirectory() {
     const result = await window.luaDl?.chooseDirectory();
@@ -89,28 +91,62 @@ export function DownloadWorkflow({
           </button>
         </div>
 
-        {mode === "downloading" ? (
-          <div className="flex gap-2">
-            <button
-              className="border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
-              type="button"
-              title="Stop"
-              onClick={onStop}
-            >
-              <Square size={16} fill="currentColor" />
-            </button>
-          </div>
-        ) : (
-          <button
-            className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
-            type="button"
-            disabled={!canDownload}
-            onClick={() => void onDownload(buildDownloadArgs())}
-          >
-            <Play size={17} aria-hidden="true" />
-            Start
-          </button>
-        )}
+        <div className="flex gap-2">
+          {(() => {
+            const queueIndex = queue.findIndex((item) => item.appId === appId);
+            const isFirst = queueIndex === 0;
+
+            if (isFirst) {
+              return (
+                <button
+                  className="border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
+                  type="button"
+                  title="Stop"
+                  onClick={onStop}
+                >
+                  <Square size={16} fill="currentColor" />
+                </button>
+              );
+            }
+
+            if (queueIndex > 0) {
+              return (
+                <button
+                  className="bg-red-500/10 text-red-500 border-line flex h-10 items-center justify-center gap-2 rounded-lg border px-4 font-bold transition-colors hover:bg-red-500/20"
+                  type="button"
+                  onClick={() => {
+                    const item = queue[queueIndex];
+                    if (item) removeFromQueue(item.id);
+                  }}
+                >
+                  <Square size={14} fill="currentColor" />
+                  Remove (#{queueIndex + 1})
+                </button>
+              );
+            }
+
+            return (
+              <button
+                className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
+                type="button"
+                disabled={!canDownload}
+                onClick={() => void onDownload(buildDownloadArgs())}
+              >
+                {queue.length > 0 ? (
+                  <>
+                    <Plus size={17} aria-hidden="true" />
+                    Add to Queue
+                  </>
+                ) : (
+                  <>
+                    <Play size={17} aria-hidden="true" />
+                    Start
+                  </>
+                )}
+              </button>
+            );
+          })()}
+        </div>
       </div>
 
       <div

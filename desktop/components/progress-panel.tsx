@@ -1,11 +1,16 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
+import { Activity, CheckCircle2, CircleAlert, X } from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export function ProgressPanel() {
   const mode = useAppStore((state) => state.mode);
   const cli = useAppStore((state) => state.cli);
+  const queue = useAppStore((state) => state.queue);
+  const removeFromQueue = useAppStore((state) => state.removeFromQueue);
+
   const progress = cli.progress;
   const percent = Math.max(
     0,
@@ -98,11 +103,79 @@ export function ProgressPanel() {
         </div>
       </div>
 
-      {/* {cli.doneMessage ? (
-        <div className="mt-auto p-3 border border-line bg-white/5 text-xs text-text/80 leading-relaxed">
-          {cli.doneMessage}
+      {/* Queue Section */}
+      {queue.length > 0 && (
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <span className="text-dim text-[10px] font-bold uppercase tracking-wider">
+              Download Queue ({queue.length})
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto min-h-0 pr-1 custom-scrollbar">
+            {queue.map((item, index) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  useAppStore.getState().setAppId(item.appId);
+                  useAppStore.getState().setMetadata(item.metadata);
+                  useAppStore.getState().setMode("ready"); // Ensure it's in ready state for viewing
+                }}
+                className={cn(
+                  "border-line group relative flex cursor-pointer flex-col overflow-hidden rounded-lg border bg-black/40 transition-all hover:bg-black/60",
+                  item.status === "downloading" &&
+                    "border-white/40 ring-1 ring-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]",
+                  item.status === "finished" && "opacity-50 grayscale",
+                )}
+              >
+                {/* Pos Indicator */}
+                <div className="absolute top-1.5 left-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-md bg-black/80 text-[10px] font-black text-white shadow-lg backdrop-blur-md border border-white/20">
+                  {index + 1}
+                </div>
+
+                {/* Status Indicator */}
+                {item.status === "downloading" && (
+                  <div className="absolute top-1.5 right-1.5 z-10">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                  </div>
+                )}
+
+                {/* Thumbnail */}
+                <div className="relative aspect-[460/215] w-full overflow-hidden bg-black/20">
+                  {item.metadata.headerImage ? (
+                    <Image
+                      src={item.metadata.headerImage}
+                      alt={item.metadata.name}
+                      width={230}
+                      height={108}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] text-text/40">
+                      NO IMG
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex items-center justify-between p-2">
+                  <span className="text-text truncate text-[10px] font-bold">
+                    {item.metadata.name}
+                  </span>
+                  {item.status !== "downloading" && (
+                    <button
+                      onClick={() => removeFromQueue(item.id)}
+                      className="text-dim hover:text-red-500 ml-1 transition-colors"
+                      title="Remove from queue"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : null} */}
+      )}
     </div>
   );
 }
