@@ -1,0 +1,7 @@
+.next/
+out/
+dist-electron/
+release/
+node_modules/
+resources/bin/lua-dl.exe
+*.log

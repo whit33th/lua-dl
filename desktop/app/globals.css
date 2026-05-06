@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-panel: #000000;
+  --color-panel-strong: #000000;
+  --color-line: #262626;
+  --color-line-strong: #3a3a3a;
+  --color-text: #f5f5f5;
+  --color-muted: #a3a3a3;
+  --color-dim: #707070;
+  --radius: 8px;
+}
+
+html,
+body {
+  font-family: var(--font-arimo), sans-serif;
+}
+
+button {
+  @apply cursor-pointer disabled:cursor-not-allowed disabled:opacity-42;
+}
+
+*:focus {
+  @apply outline-none;
+}
+
+*:focus-visible {
+  @apply outline-2 outline-offset-3 outline-white;
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 900ms linear infinite;
+}

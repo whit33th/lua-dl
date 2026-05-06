@@ -1,0 +1,54 @@
+{
+  "name": "lua-dl-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "postinstall": "powershell -ExecutionPolicy Bypass -File scripts/patch-node-pty.ps1",
+    "dev": "concurrently -k \"next dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
+    "dev:next": "next dev",
+    "build:go": "powershell -ExecutionPolicy Bypass -File scripts/build-go.ps1",
+    "build:next": "next build",
+    "build:electron": "tsup",
+    "build": "npm run build:next && npm run build:electron",
+    "start": "electron .",
+    "dist": "npm run build:go && npm run build:next && npm run build:electron && electron-builder --win"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tailwindcss/postcss": "^4.2.4",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "ansi-regex": "^6.2.2",
+    "class-variance-authority": "^0.7.1",
+    "electron-log": "^5.4.3",
+    "framer-motion": "^12.23.24",
+    "install": "^0.13.0",
+    "lucide-react": "^0.552.0",
+    "next": "^16.0.7",
+    "node-pty": "^1.1.0-beta34",
+    "postcss": "^8.5.13",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "strip-ansi": "^7.1.2",
+    "tailwindcss": "^4.2.4",
+    "zod": "^4.1.13",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "@types/node": "^24.10.2",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "electron": "^39.2.6",
+    "electron-builder": "^26.0.12",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.13"
+  }
+}

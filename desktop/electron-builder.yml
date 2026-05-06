@@ -1,0 +1,24 @@
+appId: com.luadl.desktop
+productName: lua-dl
+directories:
+  output: release
+asar: true
+asarUnpack:
+  - node_modules/node-pty/**/*
+files:
+  - out/**/*
+  - dist-electron/**/*
+  - package.json
+extraResources:
+  - from: resources/bin
+    to: bin
+win:
+  signAndEditExecutable: false
+  verifyUpdateCodeSignature: false
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
