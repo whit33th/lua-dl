@@ -144,7 +144,7 @@ export function AppShell() {
   return (
     <div className="relative z-0 flex h-full w-full flex-col pt-8">
       {/* <SplashCursor /> */}
-      <div className="z-10 mx-auto w-full max-w-3xl px-6 pb-6">
+      <div className="z-20 mx-auto w-full max-w-3xl px-6 pb-6">
         <AppIdEntry
           onSubmit={inspectApp}
           isLoading={mode === "probing" || isPending}

@@ -43,3 +43,29 @@ export function fallbackMetadata(appId: string): SteamMetadata {
     isFallback: true,
   };
 }
+
+export type SteamSearchResult = {
+  id: number;
+  name: string;
+  tiny_image: string;
+};
+
+export async function searchSteamGames(
+  term: string,
+): Promise<SteamSearchResult[]> {
+  if (term.length < 2) return [];
+
+  const response = await fetch(
+    `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(
+      term,
+    )}&l=english&cc=US`,
+  );
+  if (!response.ok) return [];
+
+  const data = await response.json();
+  return (data?.items || []).map((item: any) => ({
+    id: item.id,
+    name: item.name,
+    tiny_image: item.tiny_image,
+  }));
+}
