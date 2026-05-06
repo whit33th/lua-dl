@@ -148,6 +148,7 @@ export function AppShell() {
         <AppIdEntry
           onSubmit={inspectApp}
           isLoading={mode === "probing" || isPending}
+          disabled={mode === "downloading"}
         />
       </div>
 
@@ -206,7 +207,10 @@ export function AppShell() {
           {/* Bottom Section: Workflow */}
           <div className="border-line relative min-h-0 flex-1 border">
             <Border />
-            <DownloadWorkflow onDownload={startDownload} />
+            <DownloadWorkflow
+              onDownload={startDownload}
+              onStop={stopActiveSession}
+            />
           </div>
         </div>
 

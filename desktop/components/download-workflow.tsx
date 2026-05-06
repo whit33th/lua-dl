@@ -9,13 +9,18 @@ import {
   Package,
   PackageCheck,
   Play,
+  Square,
 } from "lucide-react";
 
 type DownloadWorkflowProps = {
   onDownload(args: string[]): Promise<void>;
+  onStop?(): void;
 };
 
-export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
+export function DownloadWorkflow({
+  onDownload,
+  onStop,
+}: DownloadWorkflowProps) {
   const appId = useAppStore((state) => state.appId);
   const mode = useAppStore((state) => state.mode);
   const cli = useAppStore((state) => state.cli);
@@ -84,15 +89,28 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
           </button>
         </div>
 
-        <button
-          className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
-          type="button"
-          disabled={!canDownload}
-          onClick={() => void onDownload(buildDownloadArgs())}
-        >
-          <Play size={17} aria-hidden="true" />
-          Start
-        </button>
+        {mode === "downloading" ? (
+          <div className="flex gap-2">
+            <button
+              className="border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
+              type="button"
+              title="Stop"
+              onClick={onStop}
+            >
+              <Square size={16} fill="currentColor" />
+            </button>
+          </div>
+        ) : (
+          <button
+            className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
+            type="button"
+            disabled={!canDownload}
+            onClick={() => void onDownload(buildDownloadArgs())}
+          >
+            <Play size={17} aria-hidden="true" />
+            Start
+          </button>
+        )}
       </div>
 
       <div

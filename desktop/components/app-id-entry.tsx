@@ -7,9 +7,10 @@ import { parseSteamAppId } from "@/lib/cli-parser";
 type AppIdEntryProps = {
   onSubmit(appId: string): void;
   isLoading: boolean;
+  disabled?: boolean;
 };
 
-export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
+export function AppIdEntry({ onSubmit, isLoading, disabled }: AppIdEntryProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
 
@@ -41,12 +42,13 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         onChange={(event) => setValue(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? "app-id-error" : undefined}
-        className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-4 text-2xl font-bold outline-none"
+        className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-4 text-2xl font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={disabled || isLoading}
       />
       <button
         type="submit"
         aria-label="Inspect App ID"
-        disabled={isLoading || !value}
+        disabled={disabled || isLoading || !value}
         className="bg-text absolute top-1/2 right-2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg text-black transition-[scale,opacity,background-color] hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-42 disabled:hover:scale-100"
       >
         {isLoading ? (

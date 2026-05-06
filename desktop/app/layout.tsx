@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Arimo, Geist } from "next/font/google";
 import "./globals.css";
 
-
 export const metadata: Metadata = {
   title: "lua-dl",
   description: "Desktop client for lua-dl",

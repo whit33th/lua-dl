@@ -28,7 +28,7 @@ export function ProgressPanel() {
             id="progress-title"
             className="text-text m-0 truncate text-xl font-bold"
           >
-            {cli.phase ?? "Status"}
+            Status
           </h2>
           <div
             className="text-muted flex items-center gap-1.5 text-sm capitalize"
