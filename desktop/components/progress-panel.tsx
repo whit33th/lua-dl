@@ -22,73 +22,75 @@ export function ProgressPanel() {
     );
 
   return (
-    <section
-      className="border  border-line  bg-panel  p-5"
-      aria-labelledby="progress-title"
-    >
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div>
-          <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
-            Status
-          </p>
-          <h2 id="progress-title" className="m-0 text-2xl font-bold">
-            {cli.phase ?? "Idle"}
+    <div className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h2 id="progress-title" className="m-0 text-xl font-bold text-text truncate">
+            {cli.phase ??   "Status"}
           </h2>
-        </div>
-        <div
-          className="inline-flex items-center gap-2 border border-line rounded-full px-3 py-2 text-muted capitalize"
-          data-mode={mode}
-        >
-          {statusIcon}
-          <span>{mode}</span>
+          <div
+            className="flex items-center gap-1.5 text-muted text-sm capitalize"
+            data-mode={mode}
+          >
+            {statusIcon}
+            <span>{mode}</span>
+          </div>
         </div>
       </div>
 
-      <div
-        className="h-2 my-6 overflow-hidden border border-line-strong  bg-black"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-      >
-        <span
-          className="block h-full bg-text transition-all"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-end">
+            <span className="text-[10px] font-bold uppercase text-dim">Progress</span>
+            <span className="text-sm font-bold text-text">{percent.toFixed(1)}%</span>
+          </div>
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-black/40 border border-line/50"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+          >
+            <span
+              className="block h-full bg-text transition-all duration-500 shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        </div>
 
-      <dl className="grid grid-cols-4 gap-2.5">
-        <div className="border border-line bg-panel-strong p-3">
-          <dt className="text-dim text-xs">Progress</dt>
-          <dd className="mt-1.25 font-bold">{percent.toFixed(1)}%</dd>
+        <div className="grid grid-cols-1 gap-2 mt-2">
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+            <span className="text-[10px] font-bold uppercase text-dim">Speed</span>
+            <span className="text-sm font-bold text-text">
+              {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+            <span className="text-[10px] font-bold uppercase text-dim">Files</span>
+            <span className="text-sm font-bold text-text">
+              {progress?.filesTotal
+                ? `${progress.filesDone} / ${progress.filesTotal}`
+                : "0 / 0"}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20 backdrop-blur-sm transition-colors hover:bg-black/30">
+            <span className="text-[10px] font-bold uppercase text-dim">Downloaded</span>
+            <span className="text-sm font-bold text-text">
+              {progress?.totalMb
+                ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
+                : "0 MB"}
+            </span>
+          </div>
         </div>
-        <div className="border border-line bg-panel-strong p-3">
-          <dt className="text-dim text-xs">Speed</dt>
-          <dd className="mt-1.25 font-bold">
-            {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
-          </dd>
-        </div>
-        <div className="border border-line bg-panel-strong p-3">
-          <dt className="text-dim text-xs">Files</dt>
-          <dd className="mt-1.25 font-bold">
-            {progress?.filesTotal
-              ? `${progress.filesDone}/${progress.filesTotal}`
-              : "0/0"}
-          </dd>
-        </div>
-        <div className="border border-line bg-panel-strong p-3">
-          <dt className="text-dim text-xs">Downloaded</dt>
-          <dd className="mt-1.25 font-bold">
-            {progress?.totalMb
-              ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
-              : "0 MB"}
-          </dd>
-        </div>
-      </dl>
+      </div>
 
       {cli.doneMessage ? (
-        <p className="mt-4 text-text">{cli.doneMessage}</p>
+        <div className="mt-auto p-3 border border-line bg-white/5 text-xs text-text/80 leading-relaxed">
+          {cli.doneMessage}
+        </div>
       ) : null}
-    </section>
+    </div>
   );
 }

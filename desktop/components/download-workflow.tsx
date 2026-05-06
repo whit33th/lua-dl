@@ -6,6 +6,7 @@ import {
   Globe2,
   HardDrive,
   Package,
+  PackageCheck,
   Play,
   RotateCcw,
 } from "lucide-react";
@@ -57,20 +58,36 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="border border-line  flex-1 h-full bg-panel  p-5"
+      className="border border-line flex-1 h-full bg-panel-strong/40 backdrop-blur-sm p-5 relative overflow-hidden"
       aria-labelledby="download-title"
     >
-      <div className="flex items-center justify-between gap-4 mb-5">
-        <div>
-          <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
-            Download
-          </p>
-          <h2 id="download-title" className="m-0 text-2xl font-bold">
-            Package options
-          </h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex gap-2">
+          <label 
+            className={`flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 transition-all hover:bg-black/80 cursor-pointer ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
+            title="All optional content"
+          >
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={downloadAll}
+              onChange={(event) => setDownloadAll(event.target.checked)}
+            />
+            {downloadAll ? <PackageCheck size={18} /> : <Package size={18} />}
+          </label>
+
+          <button
+            className="flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 text-text transition-all hover:bg-black/80 cursor-pointer"
+            type="button"
+            title={settings.outputDir || "Default folder"}
+            onClick={chooseDirectory}
+          >
+            <FolderOpen size={18} />
+          </button>
         </div>
+        
         <button
-          className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-4xl px-4 py-2.75 font-bold disabled:cursor-not-allowed disabled:opacity-42"
+          className="inline-flex items-center justify-center gap-2 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform rounded-lg px-4 py-2 font-bold disabled:cursor-not-allowed disabled:opacity-42"
           type="button"
           disabled={!canDownload}
           onClick={() => void onDownload(buildDownloadArgs())}
@@ -80,77 +97,43 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
         </button>
       </div>
 
-      <div className="grid grid-cols-[minmax(180px,240px)_minmax(0,1fr)] gap-3 my-5">
-        <label className="flex items-center gap-3 min-h-14.5 border border-line  bg-black p-3">
-          <input
-            type="checkbox"
-            checked={downloadAll}
-            onChange={(event) => setDownloadAll(event.target.checked)}
-          />
-          <span>
-            <strong className="block text-sm">All optional content</strong>
-            <small className="block text-muted text-xs mt-0.75">
-              Includes every language and DLC
-            </small>
-          </span>
-        </label>
-
-        <button
-          className="w-full flex items-center gap-3 min-h-14.5 border border-line  bg-black p-3 text-left text-text transition-all hover:border-text hover:-translate-y-0.5"
-          type="button"
-          onClick={chooseDirectory}
-        >
-          <FolderOpen size={18} aria-hidden="true" />
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-            {settings.outputDir || "Default folder"}
-          </span>
-        </button>
-      </div>
-
-      <div className="max-h-65 overflow-auto pr-1" aria-label="Depot selection">
-        {cli.depots.length === 0
-          ? null
-          : cli.depots.map((depot) => (
+      <div 
+        className="max-h-[calc(100%-4rem)] overflow-y-auto pr-1 transition-all"
+        style={{ opacity: downloadAll ? 0.4 : 1, pointerEvents: downloadAll ? 'none' : 'auto' }}
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" aria-label="Depot selection">
+          {cli.depots.length > 0 && cli.depots
+            .filter(depot => depot.kind !== "core")
+            .map((depot) => (
               <label
-                className="flex items-center gap-3 min-h-14.5 border border-line rounded-4xl bg-black p-3 transition-all mb-2 last:mb-0"
+                className="flex flex-col items-start gap-2 border border-line rounded-xl bg-black/40 p-2.5 transition-all cursor-pointer hover:bg-black/60"
                 key={depot.id}
                 data-kind={depot.kind}
-                style={{
-                  opacity:
-                    downloadAll || depot.kind === "core" || undefined
-                      ? 1
-                      : 0.55,
-                }}
               >
-                <input
-                  type="checkbox"
-                  className="w-4.5 h-4.5"
-                  checked={
-                    depot.kind === "core" || selectedDepots.includes(depot.id)
-                  }
-                  disabled={downloadAll || depot.kind === "core"}
-                  onChange={() => toggleDepot(depot.id)}
-                />
-                <DepotIcon kind={depot.kind} />
-                <span className="flex-1 min-w-0">
-                  <strong className="block text-sm">{depot.name}</strong>
-                  <small className="flex flex-wrap gap-1.75 items-center mt-0.75 text-muted text-xs">
-                    <span className="inline-flex min-h-5 items-center border border-line-strong rounded-full px-2 py-0.25 text-text text-xs font-bold uppercase">
-                      {depot.tag ?? "depot"}
+                <div className="flex items-center justify-between w-full">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 accent-text rounded"
+                    checked={downloadAll || selectedDepots.includes(depot.id)}
+                    disabled={downloadAll}
+                    onChange={() => toggleDepot(depot.id)}
+                  />
+                  <DepotIcon kind={depot.kind} />
+                </div>
+                
+                <div className="flex-1 w-full flex flex-col justify-end">
+                  <div className="flex justify-between items-center w-full">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-text/90">
+                      {depot.tag ?? depot.kind ?? "depot"}
                     </span>
-                    <span className="text-dim">{depot.id}</span>
-                    {depot.size ? (
-                      <span className="text-dim">{depot.size}</span>
-                    ) : null}
-                    {depot.manifest ? (
-                      <span className="text-dim">
-                        manifest {depot.manifest}
-                      </span>
-                    ) : null}
-                  </small>
-                </span>
+                    <span className="text-[9px] font-medium text-dim">
+                      {depot.size ? depot.size : depot.id}
+                    </span>
+                  </div>
+                </div>
               </label>
             ))}
+        </div>
       </div>
     </section>
   );

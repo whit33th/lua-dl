@@ -26,7 +26,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
 
   return (
     <form
-      className="relative flex w-full gap-2.5 border-b-3 font-mono"
+      className="relative flex w-full gap-2.5 border-b border-text/20 font-mono focus-within:border-text transition-colors"
       onSubmit={handleSubmit}
     >
       <label className="sr-only" htmlFor="app-id">
@@ -41,13 +41,13 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
         onChange={(event) => setValue(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? "app-id-error" : undefined}
-        className="h-14 w-full min-w-0 relative   bg-black text-text px-4.5 text-xl font-bold"
+        className="h-16 w-full min-w-0 relative bg-transparent text-text px-4 text-2xl outline-none placeholder:text-text/30 font-bold"
       />
       <button
         type="submit"
         aria-label="Inspect App ID"
-        disabled={isLoading}
-        className=" absolute right-2 top-1/2 -translate-y-1/2 bg-panel-strong w-14 text-text transition-all hover:border-text disabled:cursor-not-allowed disabled:opacity-42 grid place-items-center"
+        disabled={isLoading || !value}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-text text-black w-12 h-12 rounded-lg transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-42 disabled:hover:scale-100 grid place-items-center"
       >
         {isLoading ? (
           <Loader2 className="animate-spin" size={20} aria-hidden="true" />
@@ -58,7 +58,7 @@ export function AppIdEntry({ onSubmit, isLoading }: AppIdEntryProps) {
       {error ? (
         <p
           id="app-id-error"
-          className="absolute top-full left-0 mt-2 text-text text-sm"
+          className="absolute top-full left-0 mt-2 text-red-500 text-sm"
           role="alert"
         >
           {error}

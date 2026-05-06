@@ -46,8 +46,10 @@ app.whenReady().then(async () => {
     title: "lua-dl",
     width: 1280,
     height: 720,
-    minWidth: 1024,
-    minHeight: 576,
+    minWidth: 1280,
+    minHeight: 720,
+    maxWidth: 1920,
+    maxHeight: 1080,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

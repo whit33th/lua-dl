@@ -12,6 +12,11 @@ import { parseSteamAppId } from "@/lib/cli-parser";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { useAppStore } from "@/lib/store";
 import { Border } from "./SkinCard";
+import ASCIIText from "./ASCIIText";
+// import SplashCursor from "./SplashCursor";
+import Noise from "./Noise";
+import ShinyText from "./ShinyText";
+import Image from "next/image";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -98,74 +103,121 @@ export function AppShell() {
     }
   }, [activeSessionId, setActiveSession]);
 
-  return (
-    <>
-      {/* <section
-        className="flex items-center justify-between gap-4 mb-5"
-        aria-label="Application header"
-      >
-        <div className="flex gap-2.5">
-          <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-text text-panel-strong transition-all hover:-translate-y-0.5"
-            type="button"
-            onClick={stopActiveSession}
-            aria-label="Stop process"
-          >
-            <Square size={18} aria-hidden="true" />
-          </button>
+  const isIdle = mode === "idle" && !appId;
+
+  if (isIdle) {
+    return (
+      <main className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center gap-12 z-0">
+        <Noise
+          patternSize={250}
+          patternScaleX={1}
+          patternScaleY={1}
+          patternRefreshInterval={2}
+          patternAlpha={15}
+        />
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <ASCIIText
+            text="LUA-DL"
+            enableWaves={true}
+            asciiFontSize={8}
+            textFontSize={160}
+          />
         </div>
-      </section> */}
+        {/* <SplashCursor /> */}
 
-      <AppIdEntry
-        onSubmit={inspectApp}
-        isLoading={mode === "probing" || isPending}
-      />
+        <div className="z-10 flex flex-col items-center gap-6 w-full max-w-lg mx-auto relative mt-48">
+          <div className="text-center w-full bg-black/60 backdrop-blur-md p-8 rounded-3xl border border-line-strong shadow-2xl">
+            <h1 className="text-3xl font-bold text-text mb-6 tracking-widest uppercase">
+              <ShinyText text="ENTER GAME ID" disabled={false} speed={2} className="text-white" />
+            </h1>
+            <AppIdEntry
+              onSubmit={inspectApp}
+              isLoading={isPending}
+            />
+          </div>
+        </div>
 
-      <section className="flex h-full flex-1 gap-4 px-6">
-        <div className="grid relative  grid-rows-2 gap-4 w-full">
-          <Border />
-          <DownloadWorkflow onDownload={startDownload} />
+        <SettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
+      </main>
+    );
+  }
 
-          <ProgressPanel />
+  return (
+    <div className="relative w-full h-screen flex flex-col pt-8 z-0">
+      {/* <SplashCursor /> */}
+      <div className="px-6 pb-6 z-10 w-full max-w-3xl mx-auto">
+        <AppIdEntry
+          onSubmit={inspectApp}
+          isLoading={mode === "probing" || isPending}
+        />
+      </div>
+
+      <section className="flex h-full flex-1 gap-4 px-6 pb-6 z-10 overflow-hidden">
+        <div className="flex flex-col gap-4 flex-1 min-w-0">
+          {/* Top Section: Game Metadata */}
+          <div className="relative flex-none h-48 border border-line bg-panel-strong/40 backdrop-blur-sm overflow-hidden group">
+            <Border />
+            {metadata?.headerImage && (
+              <Image
+                src={metadata.headerImage}
+                fill
+                alt=""
+                className="object-cover opacity-50 grayscale blur-xl group-hover:grayscale-0 group-hover:opacity-70 transition-[filter, opacity] duration-100"
+              />
+            )}
+            <div className="relative h-full flex items-center gap-6 p-4">
+              <div className="w-48 aspect-video relative flex-none border border-line rounded-xs bg-black overflow-hidden shadow-2xl">
+                {metadata?.headerImage ? (
+                  <Image
+                    src={metadata.headerImage}
+                    fill
+                    alt=""
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-white/5">
+                    <Download size={48} className="text-white/20" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <h3 className="m-0 text-4xl font-bold text-text truncate leading-tight">
+                  <ShinyText text={metadata?.name ?? "Waiting"} disabled={false} speed={3} />
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 border border-line rounded text-xs font-bold uppercase text-muted bg-white/5">
+                    {metadata?.isFallback ? "Metadata unavailable" : (metadata?.type ?? "Ready")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Section: Workflow */}
+          <div className="relative flex-1 min-h-0">
+            <Border />
+            <DownloadWorkflow onDownload={startDownload} />
+          </div>
         </div>
 
         <aside
-          className="grid min-h-0 relative gap-4 flex-1/3 min-w-50 max-w-125"
-          aria-label="Session details"
+          className="flex-none w-80 flex flex-col gap-4 relative"
+          aria-label="Progress and Status"
         >
           <Border />
-          <div className="grid  h-full  gap-3.5 p-3.5 border border-line   ">
-            <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-4xl bg-black">
-              {metadata?.headerImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={metadata.headerImage}
-                  alt=""
-                  className="w-full h-full object-cover grayscale"
-                />
-              ) : (
-                <Download size={34} aria-hidden="true" />
-              )}
-            </div>
-            <div>
-              <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
-                {appId ? `App ${appId}` : "No app selected"}
-              </p>
-              <h3 className="m-0 text-xl">{metadata?.name ?? "Waiting"}</h3>
-              <p className="m-1.5 0 0 text-muted">
-                {metadata?.isFallback
-                  ? "Metadata unavailable"
-                  : (metadata?.type ?? "Ready")}
-              </p>
-            </div>
+          <div className="flex flex-col flex-1 p-5 border border-line bg-panel-strong/40 backdrop-blur-sm overflow-hidden">
+            <ProgressPanel />
           </div>
 
           {cli.lastError ? (
             <div
-              className="flex gap-2.5 p-3.5 bg-text text-panel-strong font-bold border border-line rounded-4xl"
+              className="flex gap-2.5 p-3.5 bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20"
               role="alert"
             >
-              <AlertCircle size={18} aria-hidden="true" />
+              <AlertCircle size={16} aria-hidden="true" className="flex-none" />
               <span>{cli.lastError}</span>
             </div>
           ) : null}
@@ -178,6 +230,6 @@ export function AppShell() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </>
+    </div>
   );
 }

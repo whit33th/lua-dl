@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Arimo, Bellefair } from "next/font/google";
+import { Arimo, Bellefair, Geist } from "next/font/google";
 import "./globals.css";
 import Frame from "@/components/Frame";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "lua-dl",
@@ -20,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body
         className={`${arimo.variable}  relative flex min-h-screen w-full flex-col gap-2 overflow-hidden antialiased`}
       >
