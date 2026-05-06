@@ -35,28 +35,28 @@ export function PromptModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-md">
       <div
-        className="w-[min(560px,100%)] border border-line rounded-4xl bg-panel  p-5"
+        className="border-line bg-panel w-[min(560px,100%)] rounded-4xl border p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="prompt-title"
         ref={panelRef}
       >
-        <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
+        <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
           Input required
         </p>
-        <h2 id="prompt-title" className="m-0 text-2xl font-bold mb-3.5">
+        <h2 id="prompt-title" className="m-0 mb-3.5 text-2xl font-bold">
           {prompt.kind === "picker" ? "Choose in CLI picker" : "Continue"}
         </h2>
-        <pre className="max-h-65 overflow-auto border border-line rounded-4xl bg-black p-3.5 whitespace-pre-wrap text-muted font-mono text-xs">
+        <pre className="border-line text-muted max-h-65 overflow-auto rounded-4xl border bg-black p-3.5 font-mono text-xs whitespace-pre-wrap">
           {prompt.text}
         </pre>
 
         {prompt.kind === "yes-no" ? (
-          <div className="flex flex-wrap gap-2.5 mt-3.5">
+          <div className="mt-3.5 flex flex-wrap gap-2.5">
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-4xl px-4 py-2.75 font-bold"
+              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("y\r")}
             >
@@ -64,7 +64,7 @@ export function PromptModal() {
               Yes
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-black border border-line-strong text-text hover:-translate-y-0.5 transition-transform rounded-4xl px-4 py-2.75 font-bold"
+              className="border-line-strong text-text inline-flex items-center justify-center gap-2.25 rounded-4xl border bg-black px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("n\r")}
             >
@@ -73,9 +73,9 @@ export function PromptModal() {
             </button>
           </div>
         ) : prompt.kind === "picker" ? (
-          <div className="flex flex-wrap gap-2.5 mt-3.5">
+          <div className="mt-3.5 flex flex-wrap gap-2.5">
             <button
-              className="min-h-10.5 border border-line-strong rounded-4xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("\u001b[A")}
               aria-label="Move selection up"
@@ -83,7 +83,7 @@ export function PromptModal() {
               <ArrowUp size={17} aria-hidden="true" />
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-4xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("\u001b[B")}
               aria-label="Move selection down"
@@ -91,28 +91,28 @@ export function PromptModal() {
               <ArrowDown size={17} aria-hidden="true" />
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-4xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write(" ")}
             >
               Toggle
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-4xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("a")}
             >
               All
             </button>
             <button
-              className="min-h-10.5 border border-line-strong rounded-4xl bg-panel-strong text-text hover:-translate-y-0.5 transition-transform px-3.25 py-0"
+              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("n")}
             >
               None
             </button>
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-4xl px-4 py-2.75 font-bold"
+              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
               type="button"
               onClick={() => write("\r")}
             >
@@ -121,17 +121,17 @@ export function PromptModal() {
           </div>
         ) : (
           <form
-            className="grid grid-cols-[1fr_auto] flex-wrap gap-2.5 mt-3.5"
+            className="mt-3.5 grid grid-cols-[1fr_auto] flex-wrap gap-2.5"
             onSubmit={submitText}
           >
             <input
               value={textValue}
               onChange={(event) => setTextValue(event.target.value)}
               autoFocus
-              className="min-w-0 border border-line-strong rounded-4xl bg-black text-text px-3 py-2"
+              className="border-line-strong text-text min-w-0 rounded-4xl border bg-black px-3 py-2"
             />
             <button
-              className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-4xl px-4 py-2.75 font-bold"
+              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
               type="submit"
             >
               Send

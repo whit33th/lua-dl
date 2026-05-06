@@ -3,9 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "export",
   assetPrefix: "./",
-  images: {
-    unoptimized: true,
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
+    optimizeCss: true,
   },
+  images: {
+    loader: "custom",
+    loaderFile: "/loader.js",
+  },
+  reactCompiler: true,
   trailingSlash: true,
 };
 

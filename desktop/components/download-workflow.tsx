@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppStore } from "@/lib/store";
 import {
   CheckCircle2,
   FolderOpen,
@@ -8,10 +9,7 @@ import {
   Package,
   PackageCheck,
   Play,
-  RotateCcw,
 } from "lucide-react";
-import { useAppStore } from "@/lib/store";
-import { Border } from "./SkinCard";
 
 type DownloadWorkflowProps = {
   onDownload(args: string[]): Promise<void>;
@@ -58,13 +56,13 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="flex-1 h-full p-5 relative"
+      className="relative h-full flex-1 p-5"
       aria-labelledby="download-title"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex gap-2">
           <label
-            className={`flex items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 transition-[color,background-color,border-color,opacity] hover:bg-black/80 cursor-pointer ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
+            className={`border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 transition-[color,background-color,border-color,opacity] hover:bg-black/80 ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
             title="All optional content"
           >
             <input
@@ -77,7 +75,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
           </label>
 
           <button
-            className="flex opacity-80 hover:opacity-100 items-center justify-center w-10 h-10 border border-line rounded-lg bg-black/50 text-text transition-[opacity,background-color,border-color] hover:bg-black/80 cursor-pointer"
+            className="border-line text-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 opacity-80 transition-[opacity,background-color,border-color] hover:bg-black/80 hover:opacity-100"
             type="button"
             title={settings.outputDir || "Default folder"}
             onClick={chooseDirectory}
@@ -87,7 +85,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
         </div>
 
         <button
-          className="inline-flex  items-center justify-center gap-2 bg-text text-panel-strong  transition-transform rounded-lg px-4 py-2 font-bold disabled:cursor-not-allowed disabled:opacity-42"
+          className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
           type="button"
           disabled={!canDownload}
           onClick={() => void onDownload(buildDownloadArgs())}
@@ -98,47 +96,50 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
       </div>
 
       <div
-        className="max-h-[calc(100%-4rem)] relative overflow-y-auto pr-1 transition-opacity"
-        style={{ opacity: downloadAll ? 0.4 : 1, pointerEvents: downloadAll ? 'none' : 'auto' }}
+        className="relative max-h-[calc(100%-4rem)] overflow-y-auto pr-1 transition-opacity"
+        style={{
+          opacity: downloadAll ? 0.4 : 1,
+          pointerEvents: downloadAll ? "none" : "auto",
+        }}
       >
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" aria-label="Depot selection">
-
-          {cli.depots.length > 0 && cli.depots
-            .filter(depot => depot.kind !== "core")
-            .map((depot) => (
-              <label
-                className="flex flex-col items-start gap-2 border border-line rounded-xl bg-black/40 p-2.5 transition-[background-color,border-color] cursor-pointer hover:bg-black/60"
-                key={depot.id}
-                data-kind={depot.kind}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 accent-text rounded"
-                    checked={downloadAll || selectedDepots.includes(depot.id)}
-                    disabled={downloadAll}
-                    onChange={() => toggleDepot(depot.id)}
-                  />
-                  <DepotIcon kind={depot.kind} />
-                </div>
-
-                <div className="flex-1 w-full flex flex-col justify-end">
-                  <div className="flex justify-between items-center w-full">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-text/90">
-                      {depot.tag ?? depot.kind ?? "depot"}
-                    </span>
-                    <span className="text-[9px] font-medium text-dim">
-                      {depot.size ? depot.size : depot.id}
-                    </span>
+        <div
+          className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+          aria-label="Depot selection"
+        >
+          {cli.depots.length > 0 &&
+            cli.depots
+              .filter((depot) => depot.kind !== "core")
+              .map((depot) => (
+                <label
+                  className="border-line flex cursor-pointer flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5 transition-[background-color,border-color] hover:bg-black/60"
+                  key={depot.id}
+                  data-kind={depot.kind}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <input
+                      type="checkbox"
+                      className="accent-text h-4 w-4 rounded"
+                      checked={downloadAll || selectedDepots.includes(depot.id)}
+                      disabled={downloadAll}
+                      onChange={() => toggleDepot(depot.id)}
+                    />
+                    <DepotIcon kind={depot.kind} />
                   </div>
-                </div>
-              </label>
-            ))}
 
+                  <div className="flex w-full flex-1 flex-col justify-end">
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-text/90 text-[11px] font-bold tracking-wider uppercase">
+                        {depot.tag ?? depot.kind ?? "depot"}
+                      </span>
+                      <span className="text-dim text-[9px] font-medium">
+                        {depot.size ? depot.size : depot.id}
+                      </span>
+                    </div>
+                  </div>
+                </label>
+              ))}
         </div>
-        <div className="sticky bottom-0 left-0 w-full h-6 bg-linear-to-t z-10 from-black to-transparent" />
-
+        <div className="sticky bottom-0 left-0 z-10 h-6 w-full bg-linear-to-t from-black to-transparent" />
       </div>
     </section>
   );

@@ -27,16 +27,16 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-5 bg-black/70 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-md">
       <aside
-        className="w-[min(560px,100%)] max-h-screen border border-line rounded-4xl bg-panel  p-5 flex flex-col"
+        className="border-line bg-panel flex max-h-screen w-[min(560px,100%)] flex-col rounded-4xl border p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
       >
-        <div className="flex items-center justify-between gap-4 mb-5">
+        <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
+            <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
               Preferences
             </p>
             <h2 id="settings-title" className="m-0 text-2xl font-bold">
@@ -44,7 +44,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </h2>
           </div>
           <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-panel-strong text-text transition-[border-color,translate,background-color,color] hover:border-text hover:-translate-y-0.5"
+            className="border-line-strong bg-panel-strong text-text hover:border-text grid h-11 w-11 place-items-center rounded-4xl border transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
             type="button"
             onClick={onClose}
             aria-label="Close settings"
@@ -53,11 +53,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </button>
         </div>
 
-        <div className="grid gap-2.5 flex-1">
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-4xl bg-black p-3">
+        <div className="grid flex-1 gap-2.5">
+          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
             <span>
               <strong className="block text-sm">Verbose logging</strong>
-              <small className="block text-muted text-xs mt-0.75">
+              <small className="text-muted mt-0.75 block text-xs">
                 Adds -v to generated commands
               </small>
             </span>
@@ -65,14 +65,14 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               type="checkbox"
               checked={settings.verbose}
               onChange={(event) => setVerbose(event.target.checked)}
-              className="w-4.5 h-4.5"
+              className="h-4.5 w-4.5"
             />
           </label>
 
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-4xl bg-black p-3">
+          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
             <span>
               <strong className="block text-sm">Keep raw logs</strong>
-              <small className="block text-muted text-xs mt-0.75">
+              <small className="text-muted mt-0.75 block text-xs">
                 Preserves original line breaks
               </small>
             </span>
@@ -80,14 +80,14 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               type="checkbox"
               checked={settings.keepRawLogs}
               onChange={(event) => setKeepRawLogs(event.target.checked)}
-              className="w-4.5 h-4.5"
+              className="h-4.5 w-4.5"
             />
           </label>
 
-          <label className="flex items-center justify-between min-h-14.5 border border-line rounded-4xl bg-black p-3">
+          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
             <span>
               <strong className="block text-sm">Compact density</strong>
-              <small className="block text-muted text-xs mt-0.75">
+              <small className="text-muted mt-0.75 block text-xs">
                 Tighter rows and panels
               </small>
             </span>
@@ -97,12 +97,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               onChange={(event) =>
                 setDensity(event.target.checked ? "compact" : "comfortable")
               }
-              className="w-4.5 h-4.5"
+              className="h-4.5 w-4.5"
             />
           </label>
 
           <button
-            className="w-full text-left border border-line rounded-4xl bg-black p-3 text-text transition-[border-color,translate,background-color,color] hover:border-text hover:-translate-y-0.5 overflow-hidden text-ellipsis whitespace-nowrap"
+            className="border-line text-text hover:border-text w-full overflow-hidden rounded-4xl border bg-black p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
             type="button"
             onClick={chooseDirectory}
           >

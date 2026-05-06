@@ -1,4 +1,9 @@
-export type SessionStatus = "starting" | "running" | "exited" | "failed" | "killed";
+export type SessionStatus =
+  | "starting"
+  | "running"
+  | "exited"
+  | "failed"
+  | "killed";
 
 export type StartOptions = {
   cwd?: string;

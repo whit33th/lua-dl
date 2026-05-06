@@ -49,7 +49,11 @@ export class GoSessionManager {
         },
       });
 
-      const session: Session = { id: sessionId, label: options.label, pty: ptyProcess };
+      const session: Session = {
+        id: sessionId,
+        label: options.label,
+        pty: ptyProcess,
+      };
       this.sessions.set(sessionId, session);
       log.info("Started lua-dl session", { sessionId, args, cwd });
 
@@ -95,7 +99,13 @@ export class GoSessionManager {
     }
     session.pty.kill();
     this.sessions.delete(sessionId);
-    this.emit({ type: "state", sessionId, status: "killed", label: session.label, time: Date.now() });
+    this.emit({
+      type: "state",
+      sessionId,
+      status: "killed",
+      label: session.label,
+      time: Date.now(),
+    });
   }
 
   killAll() {
@@ -113,7 +123,9 @@ export class GoSessionManager {
 }
 
 function parseCliChunk(sessionId: string, chunk: string): CliEvent {
-  const clean = stripAnsi(chunk).replace(/\r/g, "\n").replace(/\n{3,}/g, "\n\n");
+  const clean = stripAnsi(chunk)
+    .replace(/\r/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
   return {
     type: "output",
     sessionId,
@@ -149,10 +161,17 @@ function detectPrompt(text: string) {
   if (/\[(Y\/n|y\/N|yes\/no)\]\s*:?\s*$/i.test(normalized)) {
     return { kind: "yes-no" as const, text: normalized };
   }
-  if (/Select optional depots:|Pick one:|\bmove\b.*\bspace toggle\b/i.test(normalized)) {
+  if (
+    /Select optional depots:|Pick one:|\bmove\b.*\bspace toggle\b/i.test(
+      normalized,
+    )
+  ) {
     return { kind: "picker" as const, text: normalized };
   }
-  if (/:\s*$/.test(normalized) && /(enter|input|id|path|install)/i.test(normalized)) {
+  if (
+    /:\s*$/.test(normalized) &&
+    /(enter|input|id|path|install)/i.test(normalized)
+  ) {
     return { kind: "stdin" as const, text: normalized };
   }
   return undefined;
@@ -166,7 +185,12 @@ function stripAnsi(value: string) {
   );
 }
 
-function clampTerminalSize(value: number | undefined, min: number, max: number, fallback: number) {
+function clampTerminalSize(
+  value: number | undefined,
+  min: number,
+  max: number,
+  fallback: number,
+) {
   if (!value || Number.isNaN(value)) {
     return fallback;
   }

@@ -1,23 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { AlertCircle, Download, Gamepad2, Settings2, Square } from "lucide-react";
-import { AppIdEntry } from "./app-id-entry";
-import { DownloadWorkflow } from "./download-workflow";
-import { CliFeed } from "./cli-feed";
-import { ProgressPanel } from "./progress-panel";
-import { PromptModal } from "./prompt-modal";
-import { SettingsPanel } from "./settings-panel";
 import { parseSteamAppId } from "@/lib/cli-parser";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { useAppStore } from "@/lib/store";
-import { Border } from "./SkinCard";
-import ASCIIText from "./ASCIIText";
-// import SplashCursor from "./SplashCursor";
-import Noise from "./Noise";
-import ShinyText from "./ShinyText";
+import { AlertCircle, Gamepad2 } from "lucide-react";
 import Image from "next/image";
-import SplashCursor from "./SplashCursor";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { AppIdEntry } from "./app-id-entry";
+import { CliFeed } from "./cli-feed";
+import { DownloadWorkflow } from "./download-workflow";
+import { ProgressPanel } from "./progress-panel";
+import { PromptModal } from "./prompt-modal";
+import { SettingsPanel } from "./settings-panel";
+import Noise from "./ui/Noise";
+import ShinyText from "./ui/ShinyText";
+import SplashCursor from "./ui/SplashCursor";
+import { Border } from "./ui/Squire-Border";
+import ASCIIText from "./ui/ASCIIText";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -108,8 +107,7 @@ export function AppShell() {
 
   if (isIdle) {
     return (
-      <div className="relative w-full h-full flex flex-col items-center justify-center  z-0">
-
+      <div className="relative z-0 flex h-full w-full flex-col items-center justify-center">
         <SplashCursor />
         <Noise
           patternSize={250}
@@ -118,7 +116,7 @@ export function AppShell() {
           patternRefreshInterval={2}
           patternAlpha={15}
         />
-        <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="pointer-events-none absolute inset-0 z-0">
           <ASCIIText
             text="LUA-DL"
             enableWaves={true}
@@ -127,14 +125,11 @@ export function AppShell() {
           />
         </div>
 
-        <div className="text-center w-full z-10 max-w-lg mx-auto bg-black/60 backdrop-blur-lg p-6 rounded border border-line-strong shadow-2xl">
+        <div className="border-line-strong z-10 mx-auto w-full max-w-lg rounded border bg-black/60 p-6 text-center shadow-2xl backdrop-blur-lg">
           {/* <h1 className="text-3xl font-semibold text-text mb-6 tracking-widest">
               GAME ID
             </h1> */}
-          <AppIdEntry
-            onSubmit={inspectApp}
-            isLoading={isPending}
-          />
+          <AppIdEntry onSubmit={inspectApp} isLoading={isPending} />
         </div>
 
         <SettingsPanel
@@ -146,19 +141,19 @@ export function AppShell() {
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col pt-8 z-0">
+    <div className="relative z-0 flex h-full w-full flex-col pt-8">
       {/* <SplashCursor /> */}
-      <div className="px-6 pb-6 z-10 w-full max-w-3xl mx-auto">
+      <div className="z-10 mx-auto w-full max-w-3xl px-6 pb-6">
         <AppIdEntry
           onSubmit={inspectApp}
           isLoading={mode === "probing" || isPending}
         />
       </div>
 
-      <section className="flex h-full flex-1 gap-4 px-6 pt-1 pb-6 z-10 overflow-hidden">
-        <div className="flex flex-col gap-4 flex-1 min-w-0">
+      <section className="z-10 flex h-full flex-1 gap-4 overflow-hidden px-6 pt-1 pb-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           {/* Top Section: Game Metadata */}
-          <div className="relative flex-none h-48 border border-line backdrop-blur-sm group">
+          <div className="border-line group relative h-48 flex-none border backdrop-blur-sm">
             <Border />
             <div className="absolute inset-0 overflow-hidden">
               {metadata?.headerImage && (
@@ -166,12 +161,12 @@ export function AppShell() {
                   src={metadata.headerImage}
                   fill
                   alt=""
-                  className="object-cover opacity-50 grayscale blur-xl group-hover:grayscale-0 group-hover:opacity-70 transition-[filter,opacity] ease-in-out duration-150"
+                  className="object-cover opacity-50 blur-xl grayscale transition-[filter,opacity] duration-150 ease-in-out group-hover:opacity-70 group-hover:grayscale-0"
                 />
               )}
             </div>
-            <div className="relative h-full flex items-center gap-6 p-4">
-              <div className="h-full w-auto aspect-video relative flex-none border border-line  bg-black overflow-hidden shadow-2xl">
+            <div className="relative flex h-full items-center gap-6 p-4">
+              <div className="border-line relative aspect-video h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
                 {metadata?.headerImage ? (
                   <Image
                     src={metadata.headerImage}
@@ -180,17 +175,21 @@ export function AppShell() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="w-full z-11 h-full flex items-center justify-center  bg-white/5">
+                  <div className="z-11 flex h-full w-full items-center justify-center bg-white/5">
                     <Gamepad2 size={48} className="text-white/95" />
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-1.5 min-w-0">
-                <h3 className="m-0 text-4xl font-bold text-text truncate leading-tight">
-                  <ShinyText text={metadata?.name ?? "Waiting"} disabled={false} speed={3} />
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
+                  <ShinyText
+                    text={metadata?.name ?? "Waiting"}
+                    disabled={false}
+                    speed={3}
+                  />
                 </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 border border-line rounded  text-xs font-bold  uppercase text-muted bg-black/90">
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
                     {metadata?.isFallback ? "" : (metadata?.type ?? "Ready")}
                   </span>
                 </div>
@@ -199,17 +198,17 @@ export function AppShell() {
           </div>
 
           {/* Bottom Section: Workflow */}
-          <div className="relative flex-1 min-h-0 border border-line">
+          <div className="border-line relative min-h-0 flex-1 border">
             <Border />
             <DownloadWorkflow onDownload={startDownload} />
           </div>
         </div>
 
         <aside
-          className="flex-none w-80 flex flex-col gap-4 relative"
+          className="relative flex w-80 flex-none flex-col gap-4"
           aria-label="Progress and Status"
         >
-          <div className="flex flex-col flex-1 p-5 border border-line relative">
+          <div className="border-line relative flex flex-1 flex-col border p-5">
             <Border />
 
             <ProgressPanel />
@@ -217,7 +216,7 @@ export function AppShell() {
 
           {cli.lastError ? (
             <div
-              className="flex gap-2.5 p-3.5 bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20"
+              className="flex gap-2.5 border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-bold text-red-500"
               role="alert"
             >
               <AlertCircle size={16} aria-hidden="true" className="flex-none" />

@@ -6,7 +6,13 @@ import type { DepotOption, LogEntry, ParsedCliState } from "./cli-parser";
 import { cliEventToLog, reduceCliState } from "./cli-parser";
 import type { SteamMetadata } from "./steam-metadata";
 
-export type WorkflowMode = "idle" | "probing" | "ready" | "downloading" | "finished" | "failed";
+export type WorkflowMode =
+  | "idle"
+  | "probing"
+  | "ready"
+  | "downloading"
+  | "finished"
+  | "failed";
 
 export type DesktopSettings = {
   outputDir: string;
@@ -71,7 +77,9 @@ export const useAppStore = create<AppState>((set) => ({
         selectedDepots,
         logs: log ? [...state.logs, log].slice(-600) : state.logs,
         activeSessionId:
-          event.type === "exit" || event.type === "error" || (event.type === "state" && event.status === "killed")
+          event.type === "exit" ||
+          event.type === "error" ||
+          (event.type === "state" && event.status === "killed")
             ? undefined
             : state.activeSessionId,
         mode: inferMode(state.mode, event),
@@ -113,11 +121,15 @@ function ensureDepotSelection(selected: string[], depots: DepotOption[]) {
   if (selected.length > 0 || depots.length === 0) {
     return selected;
   }
-  const english = depots.find((depot) => depot.tag?.toLowerCase() === "english");
+  const english = depots.find(
+    (depot) => depot.tag?.toLowerCase() === "english",
+  );
   if (english) {
     return [english.id];
   }
-  const optional = depots.find((depot) => depot.kind !== "core" && depot.hasKey);
+  const optional = depots.find(
+    (depot) => depot.kind !== "core" && depot.hasKey,
+  );
   return optional ? [optional.id] : [];
 }
 

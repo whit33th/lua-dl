@@ -37,13 +37,13 @@ export function CliFeed() {
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/45 backdrop-blur">
       <section
-        className="w-full max-h-[62vh] m-0 overflow-hidden border border-line rounded-t-2xl bg-panel "
+        className="border-line bg-panel m-0 max-h-[62vh] w-full overflow-hidden rounded-t-2xl border"
         aria-labelledby="log-title"
       >
-        <div className="w-full border-b border-line bg-transparent text-text p-4">
+        <div className="border-line text-text w-full border-b bg-transparent p-4">
           <div className="flex items-center justify-between">
             <span>
-              <span className="m-0 mb-1.5 text-dim text-xs font-bold uppercase block">
+              <span className="text-dim m-0 mb-1.5 block text-xs font-bold uppercase">
                 F8
               </span>
               <strong id="log-title" className="block text-base font-bold">
@@ -51,7 +51,7 @@ export function CliFeed() {
               </strong>
             </span>
             <button
-              className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-panel-strong text-text transition-[border-color,translate,background-color,color] hover:border-text hover:-translate-y-0.5"
+              className="border-line-strong bg-panel-strong text-text hover:border-text grid h-11 w-11 place-items-center rounded-4xl border transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Close session log"
@@ -77,7 +77,7 @@ export function CliFeed() {
               <time className="text-dim text-xs">
                 {new Date(log.time).toLocaleTimeString()}
               </time>
-              <pre className="m-0 whitespace-pre-wrap break-words text-muted font-mono text-xs leading-[1.55]">
+              <pre className="text-muted m-0 font-mono text-xs leading-[1.55] break-words whitespace-pre-wrap">
                 {keepRawLogs ? log.text : log.text.replace(/\s+/g, " ")}
               </pre>
             </article>

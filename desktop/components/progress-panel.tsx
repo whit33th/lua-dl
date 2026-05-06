@@ -1,8 +1,7 @@
 "use client";
 
-import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-import { Border } from "./SkinCard";
+import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
 
 export function ProgressPanel() {
   const mode = useAppStore((state) => state.mode);
@@ -22,14 +21,17 @@ export function ProgressPanel() {
     );
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h2 id="progress-title" className="m-0 text-xl font-bold text-text truncate">
+          <h2
+            id="progress-title"
+            className="text-text m-0 truncate text-xl font-bold"
+          >
             {cli.phase ?? "Status"}
           </h2>
           <div
-            className="flex items-center gap-1.5 text-muted text-sm capitalize"
+            className="text-muted flex items-center gap-1.5 text-sm capitalize"
             data-mode={mode}
           >
             {statusIcon}
@@ -40,44 +42,54 @@ export function ProgressPanel() {
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-end">
-            <span className="text-[10px] font-bold uppercase text-dim">Progress</span>
-            <span className="text-sm font-bold text-text">{percent.toFixed(1)}%</span>
+          <div className="flex items-end justify-between">
+            <span className="text-dim text-[10px] font-bold uppercase">
+              Progress
+            </span>
+            <span className="text-text text-sm font-bold">
+              {percent.toFixed(1)}%
+            </span>
           </div>
           <div
-            className="h-1.5 overflow-hidden rounded-full bg-black/40 border border-line/50"
+            className="border-line/50 h-1.5 overflow-hidden rounded-full border bg-black/40"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}
           >
             <span
-              className="block h-full bg-text transition-[width] duration-500 shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+              className="bg-text block h-full shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-[width] duration-500"
               style={{ width: `${percent}%` }}
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 mt-2">
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
-            <span className="text-[10px] font-bold uppercase text-dim">Speed</span>
-            <span className="text-sm font-bold text-text">
+        <div className="mt-2 grid grid-cols-1 gap-2">
+          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
+            <span className="text-dim text-[10px] font-bold uppercase">
+              Speed
+            </span>
+            <span className="text-text text-sm font-bold">
               {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
-            <span className="text-[10px] font-bold uppercase text-dim">Files</span>
-            <span className="text-sm font-bold text-text">
+          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
+            <span className="text-dim text-[10px] font-bold uppercase">
+              Files
+            </span>
+            <span className="text-text text-sm font-bold">
               {progress?.filesTotal
                 ? `${progress.filesDone} / ${progress.filesTotal}`
                 : "0 / 0"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 border border-line rounded-xl bg-black/20  transition-colors hover:bg-black/30">
-            <span className="text-[10px] font-bold uppercase text-dim">Downloaded</span>
-            <span className="text-sm font-bold text-text">
+          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
+            <span className="text-dim text-[10px] font-bold uppercase">
+              Downloaded
+            </span>
+            <span className="text-text text-sm font-bold">
               {progress?.totalMb
                 ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
                 : "0 MB"}

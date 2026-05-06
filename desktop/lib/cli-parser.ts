@@ -1,4 +1,8 @@
-import type { CliEvent, DetectedPrompt, ParsedProgress } from "@/electron/ipc-contract";
+import type {
+  CliEvent,
+  DetectedPrompt,
+  ParsedProgress,
+} from "@/electron/ipc-contract";
 
 export type LogLevel = "info" | "success" | "error" | "prompt" | "progress";
 
@@ -60,7 +64,10 @@ export function cliEventToLog(event: CliEvent): LogEntry | undefined {
       return {
         id: `${event.sessionId}-${event.time}-exit`,
         sessionId: event.sessionId,
-        text: event.exitCode === 0 ? "Process finished successfully." : `Process exited with code ${event.exitCode}.`,
+        text:
+          event.exitCode === 0
+            ? "Process finished successfully."
+            : `Process exited with code ${event.exitCode}.`,
         raw: "",
         level: event.exitCode === 0 ? "success" : "error",
         time: event.time,
@@ -94,7 +101,10 @@ export function cliEventToLog(event: CliEvent): LogEntry | undefined {
   };
 }
 
-export function reduceCliState(current: ParsedCliState, event: CliEvent): ParsedCliState {
+export function reduceCliState(
+  current: ParsedCliState,
+  event: CliEvent,
+): ParsedCliState {
   if (event.type === "output") {
     const text = normalizeOutput(event.clean);
     const depots = mergeDepots(current.depots, parseDepotOptions(text));
@@ -115,10 +125,13 @@ export function reduceCliState(current: ParsedCliState, event: CliEvent): Parsed
       prompt: undefined,
       doneMessage:
         event.exitCode === 0
-          ? current.doneMessage ?? "Process finished successfully."
+          ? (current.doneMessage ?? "Process finished successfully.")
           : current.doneMessage,
       lastError:
-        event.exitCode === 0 ? current.lastError : current.lastError ?? `Process exited with code ${event.exitCode}.`,
+        event.exitCode === 0
+          ? current.lastError
+          : (current.lastError ??
+            `Process exited with code ${event.exitCode}.`),
     };
   }
 
@@ -144,7 +157,10 @@ export function parseSteamAppId(input: string) {
 }
 
 function normalizeOutput(value: string) {
-  return value.replace(/\r/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  return value
+    .replace(/\r/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function inferLogLevel(text: string, event: CliEvent): LogLevel {
@@ -164,12 +180,17 @@ function inferLogLevel(text: string, event: CliEvent): LogLevel {
 }
 
 function parsePhase(text: string) {
-  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
   return lines.find((line) => line.startsWith("▸"))?.replace(/^▸\s*/, "");
 }
 
 function parseError(text: string) {
-  const line = text.split("\n").find((item) => /^error:/i.test(item.trim()) || /\bfailed:/i.test(item));
+  const line = text
+    .split("\n")
+    .find((item) => /^error:/i.test(item.trim()) || /\bfailed:/i.test(item));
   return line?.trim();
 }
 
@@ -186,7 +207,9 @@ function parseDepotOptions(text: string): DepotOption[] {
       const tag = pickerMatch.groups.tag.trim();
       out.push({
         id: pickerMatch.groups.id,
-        name: pickerMatch.groups.name?.trim() || depotDisplayName(pickerMatch.groups.id, tag),
+        name:
+          pickerMatch.groups.name?.trim() ||
+          depotDisplayName(pickerMatch.groups.id, tag),
         tag,
         kind: tag.toLowerCase() === "dlc" ? "dlc" : "language",
         hasKey: true,
@@ -211,7 +234,8 @@ function parseDepotOptions(text: string): DepotOption[] {
       out.push({
         id: parsedMatch.groups.id,
         manifest: parsedMatch.groups.manifest,
-        name: parsedMatch.groups.name?.trim() || `Depot ${parsedMatch.groups.id}`,
+        name:
+          parsedMatch.groups.name?.trim() || `Depot ${parsedMatch.groups.id}`,
         hasKey: !parsedMatch.groups.key.startsWith("(no"),
       });
     }
@@ -235,7 +259,9 @@ function decorateDepotOptions(depots: DepotOption[]) {
           ...depot,
           tag: "core",
           kind: "core" as const,
-          name: depot.name.startsWith("Depot ") ? `Required depot ${depot.id}` : depot.name,
+          name: depot.name.startsWith("Depot ")
+            ? `Required depot ${depot.id}`
+            : depot.name,
         };
       }
 
@@ -253,7 +279,9 @@ function decorateDepotOptions(depots: DepotOption[]) {
         ...depot,
         tag: "DLC",
         kind: "dlc" as const,
-        name: depot.name.startsWith("Depot ") ? `Optional content ${depot.id}` : depot.name,
+        name: depot.name.startsWith("Depot ")
+          ? `Optional content ${depot.id}`
+          : depot.name,
       };
     });
   }
@@ -264,7 +292,9 @@ function decorateDepotOptions(depots: DepotOption[]) {
           ...depot,
           tag: "core",
           kind: "core" as const,
-          name: depot.name.startsWith("Depot ") ? `Required depot ${depot.id}` : depot.name,
+          name: depot.name.startsWith("Depot ")
+            ? `Required depot ${depot.id}`
+            : depot.name,
         }
       : depot,
   );
@@ -312,7 +342,10 @@ function mergeDepots(existing: DepotOption[], next: DepotOption[]) {
     byId.set(depot.id, {
       ...previous,
       ...depot,
-      name: depot.name && !depot.name.startsWith("Depot ") ? depot.name : previous?.name ?? depot.name,
+      name:
+        depot.name && !depot.name.startsWith("Depot ")
+          ? depot.name
+          : (previous?.name ?? depot.name),
       tag: depot.tag ?? previous?.tag,
       kind: depot.kind ?? previous?.kind,
     });
