@@ -32,7 +32,7 @@ export async function fetchSteamMetadata(appId: string): Promise<SteamMetadata> 
 export function fallbackMetadata(appId: string): SteamMetadata {
   return {
     appId,
-    name: `Hmm… ${appId}? never heard of it`,
+    name: `Hmm… ${appId}? nope.`,
     isFallback: true,
   };
 }

@@ -181,7 +181,7 @@ export function AppShell() {
                   />
                 ) : (
                   <div className="w-full z-11 h-full flex items-center justify-center  bg-white/5">
-                    <Gamepad2 size={48} className="text-white/20" />
+                    <Gamepad2 size={48} className="text-white/95" />
                   </div>
                 )}
               </div>
@@ -191,7 +191,7 @@ export function AppShell() {
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="px-2 py-0.5 border border-line rounded  text-xs font-bold  uppercase text-muted bg-black/90">
-                    {metadata?.isFallback ? "Nope." : (metadata?.type ?? "Ready")}
+                    {metadata?.isFallback ? "" : (metadata?.type ?? "Ready")}
                   </span>
                 </div>
               </div>
