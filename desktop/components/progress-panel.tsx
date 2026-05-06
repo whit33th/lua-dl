@@ -2,6 +2,7 @@
 
 import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { Border } from "./SkinCard";
 
 export function ProgressPanel() {
   const mode = useAppStore((state) => state.mode);
@@ -22,9 +23,10 @@ export function ProgressPanel() {
 
   return (
     <section
-      className="border border-line rounded-2xl bg-panel shadow-lg p-5"
+      className="border relative border-line  bg-panel shadow-lg p-5"
       aria-labelledby="progress-title"
     >
+      <Border />
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
@@ -44,7 +46,7 @@ export function ProgressPanel() {
       </div>
 
       <div
-        className="h-3 my-6 overflow-hidden border border-line-strong rounded-full bg-black"
+        className="h-2 my-6 overflow-hidden border border-line-strong  bg-black"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -57,17 +59,17 @@ export function ProgressPanel() {
       </div>
 
       <dl className="grid grid-cols-4 gap-2.5">
-        <div className="border border-line rounded-2xl bg-panel-strong p-3">
+        <div className="border border-line bg-panel-strong p-3">
           <dt className="text-dim text-xs">Progress</dt>
           <dd className="mt-1.25 font-bold">{percent.toFixed(1)}%</dd>
         </div>
-        <div className="border border-line rounded-2xl bg-panel-strong p-3">
+        <div className="border border-line bg-panel-strong p-3">
           <dt className="text-dim text-xs">Speed</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
           </dd>
         </div>
-        <div className="border border-line rounded-2xl bg-panel-strong p-3">
+        <div className="border border-line bg-panel-strong p-3">
           <dt className="text-dim text-xs">Files</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.filesTotal
@@ -75,7 +77,7 @@ export function ProgressPanel() {
               : "0/0"}
           </dd>
         </div>
-        <div className="border border-line rounded-2xl bg-panel-strong p-3">
+        <div className="border border-line bg-panel-strong p-3">
           <dt className="text-dim text-xs">Downloaded</dt>
           <dd className="mt-1.25 font-bold">
             {progress?.totalMb

@@ -10,6 +10,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { Border } from "./SkinCard";
 
 type DownloadWorkflowProps = {
   onDownload(args: string[]): Promise<void>;
@@ -56,9 +57,10 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
 
   return (
     <section
-      className="border border-line rounded-2xl flex-1 h-full bg-panel shadow-lg p-5"
+      className="border border-line relative flex-1 h-full bg-panel shadow-lg p-5"
       aria-labelledby="download-title"
     >
+      <Border />
       <div className="flex items-center justify-between gap-4 mb-5">
         <div>
           <p className="m-0 mb-1.5 text-dim text-xs font-bold uppercase">
@@ -69,7 +71,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
           </h2>
         </div>
         <button
-          className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-2xl px-4 py-2.75 font-bold disabled:cursor-not-allowed disabled:opacity-42"
+          className="inline-flex items-center justify-center gap-2.25 bg-text text-panel-strong hover:-translate-y-0.5 transition-transform border border-line-strong rounded-4xl px-4 py-2.75 font-bold disabled:cursor-not-allowed disabled:opacity-42"
           type="button"
           disabled={!canDownload}
           onClick={() => void onDownload(buildDownloadArgs())}
@@ -80,7 +82,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
       </div>
 
       <div className="grid grid-cols-[minmax(180px,240px)_minmax(0,1fr)] gap-3 my-5">
-        <label className="flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3">
+        <label className="flex items-center gap-3 min-h-14.5 border border-line  bg-black p-3">
           <input
             type="checkbox"
             checked={downloadAll}
@@ -95,7 +97,7 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
         </label>
 
         <button
-          className="w-full flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3 text-left text-text transition-all hover:border-text hover:-translate-y-0.5"
+          className="w-full flex items-center gap-3 min-h-14.5 border border-line  bg-black p-3 text-left text-text transition-all hover:border-text hover:-translate-y-0.5"
           type="button"
           onClick={chooseDirectory}
         >
@@ -107,47 +109,49 @@ export function DownloadWorkflow({ onDownload }: DownloadWorkflowProps) {
       </div>
 
       <div className="max-h-65 overflow-auto pr-1" aria-label="Depot selection">
-        {cli.depots.length === 0 ? (
-          null
-        ) : (
-          cli.depots.map((depot) => (
-            <label
-              className="flex items-center gap-3 min-h-14.5 border border-line rounded-2xl bg-black p-3 transition-all mb-2 last:mb-0"
-              key={depot.id}
-              data-kind={depot.kind}
-              style={{
-                opacity:
-                  downloadAll || depot.kind === "core" || undefined ? 1 : 0.55,
-              }}
-            >
-              <input
-                type="checkbox"
-                className="w-4.5 h-4.5"
-                checked={
-                  depot.kind === "core" || selectedDepots.includes(depot.id)
-                }
-                disabled={downloadAll || depot.kind === "core"}
-                onChange={() => toggleDepot(depot.id)}
-              />
-              <DepotIcon kind={depot.kind} />
-              <span className="flex-1 min-w-0">
-                <strong className="block text-sm">{depot.name}</strong>
-                <small className="flex flex-wrap gap-1.75 items-center mt-0.75 text-muted text-xs">
-                  <span className="inline-flex min-h-5 items-center border border-line-strong rounded-full px-2 py-0.25 text-text text-xs font-bold uppercase">
-                    {depot.tag ?? "depot"}
-                  </span>
-                  <span className="text-dim">{depot.id}</span>
-                  {depot.size ? (
-                    <span className="text-dim">{depot.size}</span>
-                  ) : null}
-                  {depot.manifest ? (
-                    <span className="text-dim">manifest {depot.manifest}</span>
-                  ) : null}
-                </small>
-              </span>
-            </label>
-          ))
-        )}
+        {cli.depots.length === 0
+          ? null
+          : cli.depots.map((depot) => (
+              <label
+                className="flex items-center gap-3 min-h-14.5 border border-line rounded-4xl bg-black p-3 transition-all mb-2 last:mb-0"
+                key={depot.id}
+                data-kind={depot.kind}
+                style={{
+                  opacity:
+                    downloadAll || depot.kind === "core" || undefined
+                      ? 1
+                      : 0.55,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  className="w-4.5 h-4.5"
+                  checked={
+                    depot.kind === "core" || selectedDepots.includes(depot.id)
+                  }
+                  disabled={downloadAll || depot.kind === "core"}
+                  onChange={() => toggleDepot(depot.id)}
+                />
+                <DepotIcon kind={depot.kind} />
+                <span className="flex-1 min-w-0">
+                  <strong className="block text-sm">{depot.name}</strong>
+                  <small className="flex flex-wrap gap-1.75 items-center mt-0.75 text-muted text-xs">
+                    <span className="inline-flex min-h-5 items-center border border-line-strong rounded-full px-2 py-0.25 text-text text-xs font-bold uppercase">
+                      {depot.tag ?? "depot"}
+                    </span>
+                    <span className="text-dim">{depot.id}</span>
+                    {depot.size ? (
+                      <span className="text-dim">{depot.size}</span>
+                    ) : null}
+                    {depot.manifest ? (
+                      <span className="text-dim">
+                        manifest {depot.manifest}
+                      </span>
+                    ) : null}
+                  </small>
+                </span>
+              </label>
+            ))}
       </div>
     </section>
   );

@@ -11,6 +11,7 @@ import { SettingsPanel } from "./settings-panel";
 import { parseSteamAppId } from "@/lib/cli-parser";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { useAppStore } from "@/lib/store";
+import { Border } from "./SkinCard";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -105,7 +106,7 @@ export function AppShell() {
       >
         <div className="flex gap-2.5">
           <button
-            className="w-11 h-11 grid place-items-center border border-line-strong rounded-2xl bg-text text-panel-strong transition-all hover:-translate-y-0.5"
+            className="w-11 h-11 grid place-items-center border border-line-strong rounded-4xl bg-text text-panel-strong transition-all hover:-translate-y-0.5"
             type="button"
             onClick={stopActiveSession}
             aria-label="Stop process"
@@ -120,7 +121,7 @@ export function AppShell() {
         isLoading={mode === "probing" || isPending}
       />
 
-      <section className="flex h-full flex-1 gap-4 px-4">
+      <section className="flex h-full flex-1 gap-4 px-6">
         <div className="grid min-h-0 grid-rows-2 gap-4 w-full">
           <DownloadWorkflow onDownload={startDownload} />
 
@@ -128,11 +129,12 @@ export function AppShell() {
         </div>
 
         <aside
-          className="grid min-h-0 gap-4 flex-1/3 min-w-50 max-w-125"
+          className="grid min-h-0 relative gap-4 flex-1/3 min-w-50 max-w-125"
           aria-label="Session details"
         >
-          <div className="grid min-h-0 h-full  gap-3.5 p-3.5 border border-line rounded-2xl bg-panel shadow-lg">
-            <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-2xl bg-black">
+          <Border />
+          <div className="grid min-h-0 h-full  gap-3.5 p-3.5 border border-line  bg-panel shadow-lg">
+            <div className="w-28 aspect-video flex items-center justify-center overflow-hidden border border-line rounded-4xl bg-black">
               {metadata?.headerImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -159,7 +161,7 @@ export function AppShell() {
 
           {cli.lastError ? (
             <div
-              className="flex gap-2.5 p-3.5 bg-text text-panel-strong font-bold border border-line rounded-2xl"
+              className="flex gap-2.5 p-3.5 bg-text text-panel-strong font-bold border border-line rounded-4xl"
               role="alert"
             >
               <AlertCircle size={18} aria-hidden="true" />

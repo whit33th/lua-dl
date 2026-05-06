@@ -79,13 +79,13 @@ function Details({ skinName }: { skinName?: string }) {
   );
 }
 
-function Border() {
+export function Border() {
   return (
-    <div>
+    <>
       <figure className="absolute top-0 left-0 h-1 w-1 origin-top-left -translate-x-1/2 -translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
       <figure className="absolute top-0 right-0 h-1 w-1 origin-top-right translate-x-1/2 -translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
       <figure className="translate-y/1/2 absolute right-0 bottom-0 h-1 w-1 origin-bottom-right translate-x-1/2 translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
       <figure className="absolute bottom-0 left-0 h-1 w-1 origin-bottom-left -translate-x-1/2 translate-y-1/2 bg-white/80 transition-all duration-200 ease-out group-hover:h-1.5 group-hover:w-1.5 group-hover:bg-white" />
-    </div>
+    </>
   );
 }
