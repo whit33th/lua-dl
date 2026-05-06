@@ -3,6 +3,7 @@
 import { parseSteamAppId } from "@/lib/cli-parser";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { useAppStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { AlertCircle, Gamepad2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState, useTransition } from "react";
@@ -161,7 +162,12 @@ export function AppShell() {
                   src={metadata.headerImage}
                   fill
                   alt=""
-                  className="object-cover opacity-50 blur-xl grayscale transition-[filter,opacity] duration-150 ease-in-out group-hover:opacity-70 group-hover:grayscale-0"
+                  className={cn(
+                    "object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
+                    mode === "downloading"
+                      ? "animate-pulse-slow grayscale-0"
+                      : "grayscale group-hover:grayscale-0",
+                  )}
                 />
               )}
             </div>
