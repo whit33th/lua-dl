@@ -166,16 +166,16 @@ export function AppIdEntry({
                 key={result.id}
                 onClick={() => handleSelect(result)}
                 className={cn(
-                  "flex w-full items-center gap-4 rounded-lg p-2 text-left transition-colors",
+                  "flex w-full items-center gap-4 rounded-xs p-2 text-left transition-colors",
                   selectedIndex === index
                     ? "bg-white/20 shadow-lg"
                     : "hover:bg-white/10",
                 )}
               >
-                <div className="relative h-auto w-20 aspect-video flex-none overflow-hidden  border border-white/10 bg-black/40">
+                <div className="relative aspect-8/3 flex-none overflow-hidden border border-white/10 bg-black/40">
                   <Image
-                    width={200}
-                    height={200}
+                    width={120}
+                    height={45}
                     src={result.tiny_image}
                     alt=""
                     className="h-full w-full object-cover"
