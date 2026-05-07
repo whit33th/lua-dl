@@ -1,12 +1,14 @@
 # lua-dl Desktop
 
 A desktop application for easily downloading games and applications from Steam and other platforms.
+
 <div style="width: 100%; display: flex; justify-content: center;">
   <img 
     src="https://github.com/user-attachments/assets/bb59ca2f-8a01-4066-8d64-4f22760cb7eb"
     style="width: 100%; max-width: 100%; height: auto; object-fit: contain;"
   />
 </div>
+
 ## Getting Started
 
 1. Download the latest version from the [releases page](https://github.com/whit33th/lua-dl/releases)
