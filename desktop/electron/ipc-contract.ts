@@ -68,12 +68,32 @@ export type CliEvent =
       time: number;
     };
 
+export type UpdateStatus =
+  | "checking"
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "error";
+
+export type UpdateEvent = {
+  type: UpdateStatus;
+  version?: string;
+  progress?: number;
+  message?: string;
+};
+
 export type LuaDlApi = {
   start(args: string[], options?: StartOptions): Promise<StartResult>;
   write(sessionId: string, input: string): Promise<void>;
   kill(sessionId: string): Promise<void>;
   chooseDirectory(): Promise<DirectoryResult>;
   onEvent(callback: (event: CliEvent) => void): () => void;
+  // Update related
+  checkForUpdates(): Promise<void>;
+  downloadUpdate(): Promise<void>;
+  installUpdate(): Promise<void>;
+  onUpdateEvent(callback: (event: UpdateEvent) => void): () => void;
 };
 
 declare global {

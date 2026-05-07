@@ -5,6 +5,7 @@ import type { CliEvent } from "@/electron/ipc-contract";
 import type { DepotOption, LogEntry, ParsedCliState } from "./cli-parser";
 import { cliEventToLog, reduceCliState } from "./cli-parser";
 import type { SteamMetadata } from "./steam-metadata";
+import type { UpdateEvent } from "@/electron/ipc-contract";
 
 export type WorkflowMode =
   | "idle"
@@ -31,6 +32,7 @@ type AppState = {
   selectedDepots: string[];
   downloadAll: boolean;
   settings: DesktopSettings;
+  updateState: UpdateEvent;
   setAppId(appId: string): void;
   setMetadata(metadata?: SteamMetadata): void;
   setMode(mode: WorkflowMode): void;
@@ -44,6 +46,7 @@ type AppState = {
   setVerbose(value: boolean): void;
   setKeepRawLogs(value: boolean): void;
   setDensity(value: DesktopSettings["density"]): void;
+  setUpdateState(event: UpdateEvent): void;
 };
 
 const defaultCliState: ParsedCliState = {
@@ -63,6 +66,7 @@ export const useAppStore = create<AppState>((set) => ({
     keepRawLogs: true,
     density: "comfortable",
   },
+  updateState: { type: "not-available" },
   setAppId: (appId) => set({ appId }),
   setMetadata: (metadata) => set({ metadata }),
   setMode: (mode) => set({ mode }),
@@ -121,6 +125,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       settings: { ...state.settings, density },
     })),
+  setUpdateState: (updateState) => set({ updateState }),
 }));
 
 function ensureDepotSelection(selected: string[], depots: DepotOption[]) {

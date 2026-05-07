@@ -158,9 +158,16 @@ function detectPrompt(text: string) {
   if (!normalized) {
     return undefined;
   }
-  if (/\[(Y\/n|y\/N|yes\/no)\]\s*:?\s*$/i.test(normalized)) {
+
+  // Match yes/no anywhere in output (including mid-line after descriptions)
+  if (/\[(Y\/n|y\/N|yes\/no)\]\s*:?\s*$/im.test(normalized)) {
     return { kind: "yes-no" as const, text: normalized };
   }
+  // Also catch standalone yes/no lines that may include a colon
+  if (/\b(install now|continue|proceed|download|update)\?\s*\[y\/?n\]/i.test(normalized)) {
+    return { kind: "yes-no" as const, text: normalized };
+  }
+
   if (
     /Select optional depots:|Pick one:|\bmove\b.*\bspace toggle\b/i.test(
       normalized,

@@ -34,6 +34,8 @@ export function PromptModal() {
     }
   }
 
+  const { title, subtitle } = extractPromptMeta(prompt.kind, prompt.text);
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-md">
       <div
@@ -44,10 +46,10 @@ export function PromptModal() {
         ref={panelRef}
       >
         <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
-          Input required
+          {subtitle}
         </p>
         <h2 id="prompt-title" className="m-0 mb-3.5 text-2xl font-bold">
-          {prompt.kind === "picker" ? "Choose in CLI picker" : "Continue"}
+          {title}
         </h2>
         <pre className="border-line text-muted max-h-65 overflow-auto rounded-4xl border bg-black p-3.5 font-mono text-xs whitespace-pre-wrap">
           {prompt.text}
@@ -141,4 +143,50 @@ export function PromptModal() {
       </div>
     </div>
   );
+}
+
+function extractPromptMeta(kind: string, text: string): { title: string; subtitle: string } {
+  if (kind === "picker") {
+    return { title: "Select content to download", subtitle: "Choose depots" };
+  }
+
+  if (kind === "yes-no") {
+    // Try to find the actual question line containing [Y/n]
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const questionLine = lines.find((l) => /\[(y\/n|Y\/n|y\/N)\]/i.test(l));
+
+    if (questionLine) {
+      // Strip the [Y/n] part and trailing colon/spaces
+      const clean = questionLine.replace(/\s*\[(y\/n|Y\/n|y\/N)\]\s*:?\s*$/i, "").trim();
+
+      if (/install now/i.test(clean)) {
+        return { title: "Install next package?", subtitle: "Confirmation required" };
+      }
+      if (/online fix|crack|patch/i.test(clean)) {
+        return { title: "Apply online fix / patch?", subtitle: "Confirmation required" };
+      }
+      if (/continue/i.test(clean)) {
+        return { title: "Continue installation?", subtitle: "Confirmation required" };
+      }
+      if (/update/i.test(clean)) {
+        return { title: "Apply update?", subtitle: "Confirmation required" };
+      }
+      if (/download/i.test(clean)) {
+        return { title: "Start download?", subtitle: "Confirmation required" };
+      }
+      if (clean.length > 0 && clean.length < 80) {
+        return { title: clean, subtitle: "Confirmation required" };
+      }
+    }
+    return { title: "Confirm to continue", subtitle: "Confirmation required" };
+  }
+
+  // stdin
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lastLine = lines.at(-1) ?? "";
+  const clean = lastLine.replace(/:?\s*$/, "").trim();
+  return {
+    title: clean.length > 0 && clean.length < 80 ? clean : "Enter a value",
+    subtitle: "Input required",
+  };
 }

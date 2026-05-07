@@ -19,6 +19,7 @@ import SplashCursor from "./ui/SplashCursor";
 import { Border } from "./ui/Squire-Border";
 import ASCIIText from "./ui/ASCIIText";
 import { Skeleton } from "./ui/skeleton";
+import { UpdateModal } from "./update-modal";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -36,12 +37,25 @@ export function AppShell() {
   const clearRun = useAppStore((state) => state.clearRun);
   const clearLogs = useAppStore((state) => state.clearLogs);
   const ingestEvent = useAppStore((state) => state.ingestEvent);
+  const setUpdateState = useAppStore((state) => state.setUpdateState);
 
   useEffect(() => {
-    return window.luaDl?.onEvent((event) => {
+    const unsubEvent = window.luaDl?.onEvent((event) => {
       ingestEvent(event);
     });
-  }, [ingestEvent]);
+
+    const unsubUpdate = window.luaDl?.onUpdateEvent((event) => {
+      setUpdateState(event);
+    });
+
+    // Check for updates on startup
+    void window.luaDl?.checkForUpdates();
+
+    return () => {
+      unsubEvent?.();
+      unsubUpdate?.();
+    };
+  }, [ingestEvent, setUpdateState]);
 
   const startSession = useCallback(
     async (args: string[], label: string) => {
@@ -265,6 +279,7 @@ export function AppShell() {
 
       <CliFeed />
       <PromptModal />
+      <UpdateModal />
       <SettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}

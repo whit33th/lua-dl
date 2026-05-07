@@ -12,13 +12,20 @@ files:
 extraResources:
   - from: resources/bin
     to: bin
+publish:
+  provider: github
+  owner: whit33th
+  repo: lua-dl
+
 win:
   signAndEditExecutable: false
   verifyUpdateCodeSignature: false
   target:
     - nsis
   artifactName: ${productName}-${version}-${arch}.${ext}
+
 nsis:
-  oneClick: false
+  oneClick: true
   perMachine: false
-  allowToChangeInstallationDirectory: true
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false

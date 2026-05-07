@@ -14,6 +14,14 @@ contextBridge.exposeInMainWorld("luaDl", {
     ipcRenderer.on("go:event", listener);
     return () => ipcRenderer.off("go:event", listener);
   },
+  checkForUpdates: () => ipcRenderer.invoke("update:check"),
+  downloadUpdate: () => ipcRenderer.invoke("update:download"),
+  installUpdate: () => ipcRenderer.invoke("update:install"),
+  onUpdateEvent: (callback: (event: any) => void) => {
+    const listener = (_event: any, payload: any) => callback(payload);
+    ipcRenderer.on("update:event", listener);
+    return () => ipcRenderer.off("update:event", listener);
+  },
 });
 
 contextBridge.exposeInMainWorld("api", {

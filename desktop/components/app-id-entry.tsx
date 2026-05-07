@@ -6,6 +6,7 @@ import { parseSteamAppId } from "@/lib/cli-parser";
 import { searchSteamGames, type SteamSearchResult } from "@/lib/steam-metadata";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Border } from "./ui/Squire-Border";
 
 type AppIdEntryProps = {
   onSubmit(appId: string): void;
@@ -113,10 +114,11 @@ export function AppIdEntry({
   return (
     <div className="relative w-full">
       <form
-        className="border-text/20 focus-within:border-text relative flex w-full gap-2.5 border-b font-mono transition-colors"
+        className="border-line relative flex w-full items-stretch bg-black/80 font-mono transition-colors focus-within:bg-black"
         onSubmit={handleSubmit}
         onFocus={() => results.length > 0 && setShowDropdown(true)}
       >
+        <Border />
         <label className="sr-only" htmlFor="app-id">
           Steam App ID or Name
         </label>
@@ -135,19 +137,24 @@ export function AppIdEntry({
           autoComplete="off"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "app-id-error" : undefined}
-          className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-2 text-2xl font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-4 text-2xl font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"
           disabled={disabled || isLoading}
         />
         <button
           type="submit"
           aria-label="Inspect App ID"
           disabled={disabled || isLoading || !value}
-          className="bg-text absolute top-1/2 right-2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg text-black transition-[scale,opacity,background-color] hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-42 disabled:hover:scale-100"
+          className={cn(
+            "relative flex h-16 w-auto items-center aspect-square justify-center border-l border-line transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-42",
+            value && !isLoading && !disabled
+              ? "bg-text text-black hover:bg-white"
+              : "bg-black text-text/40 hover:bg-white/10 hover:text-text",
+          )}
         >
           {isLoading || isSearching ? (
-            <Loader2 className="animate-spin" size={20} aria-hidden="true" />
+            <Loader2 className="animate-spin" size={24} aria-hidden="true" />
           ) : (
-            <ArrowRight size={20} aria-hidden="true" />
+            <ArrowRight size={24} aria-hidden="true" />
           )}
         </button>
       </form>

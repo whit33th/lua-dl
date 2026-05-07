@@ -7,6 +7,7 @@ import {
   session,
   shell,
 } from "electron";
+import { autoUpdater } from "electron-updater";
 import log from "electron-log/main";
 import path from "node:path";
 import { GoSessionManager } from "./go-session";
@@ -63,6 +64,7 @@ app.whenReady().then(async () => {
 
   sessions = new GoSessionManager(mainWindow);
   registerIpcHandlers(sessions);
+  setupAutoUpdater(mainWindow);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("https://") || url.startsWith("http://")) {
@@ -151,6 +153,59 @@ function registerIpcHandlers(manager: GoSessionManager) {
 
   ipcMain.handle("window:close", () => {
     mainWindow?.close();
+  });
+
+  ipcMain.handle("update:check", async () => {
+    await autoUpdater.checkForUpdates();
+  });
+
+  ipcMain.handle("update:download", async () => {
+    await autoUpdater.downloadUpdate();
+  });
+
+  ipcMain.handle("update:install", () => {
+    autoUpdater.quitAndInstall();
+  });
+}
+
+function setupAutoUpdater(window: BrowserWindow) {
+  autoUpdater.autoDownload = false; // We want manual confirmation
+  autoUpdater.logger = log;
+
+  autoUpdater.on("checking-for-update", () => {
+    window.webContents.send("update:event", { type: "checking" });
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    window.webContents.send("update:event", {
+      type: "available",
+      version: info.version,
+    });
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    window.webContents.send("update:event", { type: "not-available" });
+  });
+
+  autoUpdater.on("error", (err) => {
+    window.webContents.send("update:event", {
+      type: "error",
+      message: err.message,
+    });
+  });
+
+  autoUpdater.on("download-progress", (progressObj) => {
+    window.webContents.send("update:event", {
+      type: "downloading",
+      progress: progressObj.percent,
+    });
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    window.webContents.send("update:event", {
+      type: "downloaded",
+      version: info.version,
+    });
   });
 }
 
