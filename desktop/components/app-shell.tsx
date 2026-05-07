@@ -199,6 +199,9 @@ export function AppShell() {
                       "object-cover",
                       mode === "downloading" && "animate-pulse-slow",
                     )}
+                    loading="eager"
+                    priority
+                    fetchPriority="high"
                   />
                 ) : mode === "probing" ? (
                   <Skeleton className="h-full w-full" />

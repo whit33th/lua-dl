@@ -43,9 +43,13 @@ app.whenReady().then(async () => {
     },
   );
 
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, "icons/win/icon.ico")
+    : path.join(app.getAppPath(), "resources/icons/win/icon.ico");
+
   mainWindow = new BrowserWindow({
     title: "lua-dl",
-    icon: path.join(app.getAppPath(), app.isPackaged ? "../icon.png" : "./resources/icon.png"),
+    icon: iconPath,
     width: 1280,
     height: 720,
     minWidth: 1280,

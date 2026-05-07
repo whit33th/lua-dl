@@ -2,6 +2,7 @@ appId: com.luadl.desktop
 productName: lua-dl
 directories:
   output: release
+  buildResources: build
 asar: true
 asarUnpack:
   - node_modules/node-pty/**/*
@@ -12,6 +13,7 @@ files:
 extraResources:
   - from: resources/bin
     to: bin
+  - from: resources/icon.png
 publish:
   provider: github
   owner: whit33th
@@ -29,6 +31,6 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: false
   deleteAppDataOnUninstall: false
-  installerIcon: build/icon.ico
-  uninstallerIcon: build/icon.ico
+  installerIcon: icon.ico
+  uninstallerIcon: icon.ico
   uninstallDisplayName: lua-dl

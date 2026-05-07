@@ -191,6 +191,7 @@ export function AppIdEntry({
                     src={result.tiny_image}
                     alt=""
                     className="h-full w-full object-cover"
+                    loading="eager"
                   />
                 </div>
                 <div className="flex min-w-0 flex-col">
