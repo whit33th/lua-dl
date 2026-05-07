@@ -10,9 +10,9 @@ A desktop application for easily downloading games and applications from Steam S
 ## Getting Started
 
 1. Download the latest version from the [releases page](https://github.com/whit33th/lua-dl/releases)
-2. Run the installer (lua-dl-\*.exe)
+2. Run the installer (`lua-dl-\*.exe`)
 3. Launch the application
-4. Search for an game name or enter an app ID 
-5. Click start and wait for it to complete
+4. Search for a game or enter a Steam App ID
+5. Click **Start** and wait for the download to complete
 
 That's it.
