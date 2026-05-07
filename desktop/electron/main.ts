@@ -45,6 +45,7 @@ app.whenReady().then(async () => {
 
   mainWindow = new BrowserWindow({
     title: "lua-dl",
+    icon: path.join(app.getAppPath(), app.isPackaged ? "../icon.png" : "./resources/icon.png"),
     width: 1280,
     height: 720,
     minWidth: 1280,

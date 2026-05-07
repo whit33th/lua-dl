@@ -16,10 +16,10 @@ publish:
   provider: github
   owner: whit33th
   repo: lua-dl
+  releaseType: release
 
 win:
-  signAndEditExecutable: false
-  verifyUpdateCodeSignature: false
+  icon: build/icon.ico
   target:
     - nsis
   artifactName: ${productName}-${version}-${arch}.${ext}
@@ -29,3 +29,6 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: false
   deleteAppDataOnUninstall: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  uninstallDisplayName: lua-dl

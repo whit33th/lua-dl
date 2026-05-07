@@ -33,6 +33,7 @@ type AppState = {
   downloadAll: boolean;
   settings: DesktopSettings;
   updateState: UpdateEvent;
+  isUpdateModalOpen: boolean;
   setAppId(appId: string): void;
   setMetadata(metadata?: SteamMetadata): void;
   setMode(mode: WorkflowMode): void;
@@ -47,6 +48,7 @@ type AppState = {
   setKeepRawLogs(value: boolean): void;
   setDensity(value: DesktopSettings["density"]): void;
   setUpdateState(event: UpdateEvent): void;
+  setUpdateModalOpen(open: boolean): void;
 };
 
 const defaultCliState: ParsedCliState = {
@@ -67,6 +69,7 @@ export const useAppStore = create<AppState>((set) => ({
     density: "comfortable",
   },
   updateState: { type: "not-available" },
+  isUpdateModalOpen: false,
   setAppId: (appId) => set({ appId }),
   setMetadata: (metadata) => set({ metadata }),
   setMode: (mode) => set({ mode }),
@@ -126,6 +129,7 @@ export const useAppStore = create<AppState>((set) => ({
       settings: { ...state.settings, density },
     })),
   setUpdateState: (updateState) => set({ updateState }),
+  setUpdateModalOpen: (open) => set({ isUpdateModalOpen: open }),
 }));
 
 function ensureDepotSelection(selected: string[], depots: DepotOption[]) {

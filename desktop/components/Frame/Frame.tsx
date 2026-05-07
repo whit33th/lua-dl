@@ -51,14 +51,13 @@ export default function Frame() {
 }
 function UpdateIndicator() {
   const updateState = useAppStore((state) => state.updateState);
-  const setUpdateState = useAppStore((state) => state.setUpdateState);
+  const setUpdateModalOpen = useAppStore((state) => state.setUpdateModalOpen);
 
   const handleClick = () => {
     if (updateState.type === "not-available") {
       void window.luaDl?.checkForUpdates();
     } else {
-      // The modal will handle the rest if we ensure it's visible.
-      // If it was error or not-available, we might want to reset it or just show it.
+      setUpdateModalOpen(true);
     }
   };
 
