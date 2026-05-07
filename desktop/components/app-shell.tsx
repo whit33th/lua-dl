@@ -177,10 +177,11 @@ export function AppShell() {
               {metadata?.headerImage && (
                 <Image
                   src={metadata.headerImage}
-                  fill
+                  width={460}
+                  height={215}
                   alt=""
                   className={cn(
-                    "object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
+                    "h-full w-full object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
                     mode === "downloading"
                       ? "animate-pulse-slow grayscale-0"
                       : "grayscale group-hover:grayscale-0",
@@ -189,11 +190,12 @@ export function AppShell() {
               )}
             </div>
             <div className="relative flex h-full items-center gap-6 p-4">
-              <div className="border-line relative aspect-video h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
+              <div className="border-line relative aspect-92/43 h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
                 {metadata?.headerImage ? (
                   <Image
                     src={metadata.headerImage}
-                    fill
+                    width={460}
+                    height={215}
                     alt=""
                     className={cn(
                       "object-cover",
@@ -214,18 +216,18 @@ export function AppShell() {
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 {metadata ? (
                   <>
-                    <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
+                    <h3 className="text-text m-0 line-clamp-3 text-4xl leading-tight font-bold text-wrap">
                       <ShinyText
                         text={metadata.name}
                         disabled={false}
                         speed={3}
                       />
                     </h3>
-                    <div className="mt-1 flex items-center gap-2">
+                    {/* <div className="mt-1 flex items-center gap-2">
                       <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
                         {metadata.isFallback ? "" : (metadata.type ?? "Ready")}
                       </span>
-                    </div>
+                    </div> */}
                   </>
                 ) : mode === "probing" ? (
                   <>
