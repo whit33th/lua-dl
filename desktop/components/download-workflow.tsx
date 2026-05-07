@@ -11,6 +11,7 @@ import {
   Play,
   Square,
 } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 type DownloadWorkflowProps = {
   onDownload(args: string[]): Promise<void>;
@@ -124,38 +125,58 @@ export function DownloadWorkflow({
           className="grid grid-cols-2 gap-2 sm:grid-cols-3"
           aria-label="Depot selection"
         >
-          {cli.depots.length > 0 &&
-            cli.depots
-              .filter((depot) => depot.kind !== "core")
-              .map((depot) => (
-                <label
-                  className="border-line flex cursor-pointer flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5 transition-[background-color,border-color] hover:bg-black/60"
-                  key={depot.id}
-                  data-kind={depot.kind}
+          {cli.depots.filter((d) => d.kind !== "core").length === 0 &&
+          mode === "probing"
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="border-line flex flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5"
                 >
                   <div className="flex w-full items-center justify-between">
-                    <input
-                      type="checkbox"
-                      className="accent-text h-4 w-4 rounded"
-                      checked={downloadAll || selectedDepots.includes(depot.id)}
-                      disabled={downloadAll}
-                      onChange={() => toggleDepot(depot.id)}
-                    />
-                    <DepotIcon kind={depot.kind} />
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-5 w-5 rounded-full" />
                   </div>
-
                   <div className="flex w-full flex-1 flex-col justify-end">
                     <div className="flex w-full items-center justify-between">
-                      <span className="text-text/90 text-[11px] font-bold tracking-wider uppercase">
-                        {depot.tag ?? depot.kind ?? "depot"}
-                      </span>
-                      <span className="text-dim text-[9px] font-medium">
-                        {depot.size ? depot.size : depot.id}
-                      </span>
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-2 w-10" />
                     </div>
                   </div>
-                </label>
-              ))}
+                </div>
+              ))
+            : cli.depots
+                .filter((depot) => depot.kind !== "core")
+                .map((depot) => (
+                  <label
+                    className="border-line flex cursor-pointer flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5 transition-[background-color,border-color] hover:bg-black/60"
+                    key={depot.id}
+                    data-kind={depot.kind}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <input
+                        type="checkbox"
+                        className="accent-text h-4 w-4 rounded"
+                        checked={
+                          downloadAll || selectedDepots.includes(depot.id)
+                        }
+                        disabled={downloadAll}
+                        onChange={() => toggleDepot(depot.id)}
+                      />
+                      <DepotIcon kind={depot.kind} />
+                    </div>
+
+                    <div className="flex w-full flex-1 flex-col justify-end">
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-text/90 text-[11px] font-bold tracking-wider uppercase">
+                          {depot.tag ?? depot.kind ?? "depot"}
+                        </span>
+                        <span className="text-dim text-[9px] font-medium">
+                          {depot.size ? depot.size : depot.id}
+                        </span>
+                      </div>
+                    </div>
+                  </label>
+                ))}
         </div>
         <div className="sticky bottom-0 left-0 z-10 h-6 w-full bg-linear-to-t from-black to-transparent" />
       </div>

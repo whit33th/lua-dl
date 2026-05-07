@@ -46,6 +46,7 @@ button {
 }
 
 @keyframes pulse-slow {
+
   0%,
   100% {
     opacity: 0.5;
@@ -58,6 +59,22 @@ button {
 
 .animate-pulse-slow {
   animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-skeleton {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @theme inline {

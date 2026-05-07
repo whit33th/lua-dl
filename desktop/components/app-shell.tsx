@@ -18,6 +18,7 @@ import ShinyText from "./ui/ShinyText";
 import SplashCursor from "./ui/SplashCursor";
 import { Border } from "./ui/Squire-Border";
 import ASCIIText from "./ui/ASCIIText";
+import { Skeleton } from "./ui/skeleton";
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -33,6 +34,7 @@ export function AppShell() {
   const setMode = useAppStore((state) => state.setMode);
   const setActiveSession = useAppStore((state) => state.setActiveSession);
   const clearRun = useAppStore((state) => state.clearRun);
+  const clearLogs = useAppStore((state) => state.clearLogs);
   const ingestEvent = useAppStore((state) => state.ingestEvent);
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export function AppShell() {
 
   const startDownload = useCallback(
     async (args: string[]) => {
-      clearRun();
+      clearLogs();
       setMode("downloading");
       await startSession(args, `Download ${appId}`).catch(() => {
         setMode("failed");
@@ -179,27 +181,52 @@ export function AppShell() {
                     src={metadata.headerImage}
                     fill
                     alt=""
-                    className="object-cover"
+                    className={cn(
+                      "object-cover",
+                      mode === "downloading" && "animate-pulse-slow",
+                    )}
                   />
+                ) : mode === "probing" ? (
+                  <Skeleton className="h-full w-full" />
                 ) : (
                   <div className="z-11 flex h-full w-full items-center justify-center bg-white/5">
                     <Gamepad2 size={48} className="text-white/95" />
                   </div>
                 )}
               </div>
-              <div className="flex min-w-0 flex-col gap-1.5">
-                <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
-                  <ShinyText
-                    text={metadata?.name ?? "Waiting"}
-                    disabled={false}
-                    speed={3}
-                  />
-                </h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
-                    {metadata?.isFallback ? "" : (metadata?.type ?? "Ready")}
-                  </span>
-                </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                {metadata ? (
+                  <>
+                    <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
+                      <ShinyText
+                        text={metadata.name}
+                        disabled={false}
+                        speed={3}
+                      />
+                    </h3>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
+                        {metadata.isFallback ? "" : (metadata.type ?? "Ready")}
+                      </span>
+                    </div>
+                  </>
+                ) : mode === "probing" ? (
+                  <>
+                    <Skeleton className="h-10 w-2/3" />
+                    <Skeleton className="mt-2 h-5 w-24" />
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
+                      <ShinyText text="Waiting" disabled={false} speed={3} />
+                    </h3>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
+                        Ready
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

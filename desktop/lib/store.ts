@@ -37,6 +37,7 @@ type AppState = {
   setActiveSession(sessionId?: string): void;
   ingestEvent(event: CliEvent): void;
   clearRun(): void;
+  clearLogs(): void;
   toggleDepot(depotId: string): void;
   setDownloadAll(value: boolean): void;
   setOutputDir(path: string): void;
@@ -87,10 +88,15 @@ export const useAppStore = create<AppState>((set) => ({
     }),
   clearRun: () =>
     set({
+      metadata: undefined,
       logs: [],
       cli: defaultCliState,
       selectedDepots: [],
       activeSessionId: undefined,
+    }),
+  clearLogs: () =>
+    set({
+      logs: [],
     }),
   toggleDepot: (depotId) =>
     set((state) => ({

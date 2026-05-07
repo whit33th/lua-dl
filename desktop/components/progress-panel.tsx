@@ -2,6 +2,7 @@
 
 import { useAppStore } from "@/lib/store";
 import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 export function ProgressPanel() {
   const mode = useAppStore((state) => state.mode);
@@ -69,31 +70,45 @@ export function ProgressPanel() {
             <span className="text-dim text-[10px] font-bold uppercase">
               Speed
             </span>
-            <span className="text-text text-sm font-bold">
-              {progress?.mbps ? `${progress.mbps.toFixed(1)} MB/s` : "0.0 MB/s"}
-            </span>
+            {mode === "probing" ? (
+              <Skeleton className="h-4 w-16" />
+            ) : (
+              <span className="text-text text-sm font-bold">
+                {progress?.mbps
+                  ? `${progress.mbps.toFixed(1)} MB/s`
+                  : "0.0 MB/s"}
+              </span>
+            )}
           </div>
 
           <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
             <span className="text-dim text-[10px] font-bold uppercase">
               Files
             </span>
-            <span className="text-text text-sm font-bold">
-              {progress?.filesTotal
-                ? `${progress.filesDone} / ${progress.filesTotal}`
-                : "0 / 0"}
-            </span>
+            {mode === "probing" ? (
+              <Skeleton className="h-4 w-12" />
+            ) : (
+              <span className="text-text text-sm font-bold">
+                {progress?.filesTotal
+                  ? `${progress.filesDone} / ${progress.filesTotal}`
+                  : "0 / 0"}
+              </span>
+            )}
           </div>
 
           <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
             <span className="text-dim text-[10px] font-bold uppercase">
               Downloaded
             </span>
-            <span className="text-text text-sm font-bold">
-              {progress?.totalMb
-                ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
-                : "0 MB"}
-            </span>
+            {mode === "probing" ? (
+              <Skeleton className="h-4 w-20" />
+            ) : (
+              <span className="text-text text-sm font-bold">
+                {progress?.totalMb
+                  ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
+                  : "0 MB"}
+              </span>
+            )}
           </div>
         </div>
       </div>
