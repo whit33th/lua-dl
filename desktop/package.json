@@ -14,7 +14,7 @@
     "build:electron": "tsup",
     "build": "npm run build:next && npm run build:electron",
     "start": "electron .",
-    "dist": "npm run build:go && npm run build:next && npm run build:electron && electron-builder --win"
+    "dist": "npm run build:go && npm run build:next && npm run build:electron && dotenv -- electron-builder --win -p always"
   },
   "dependencies": {
     "babel-plugin-react-compiler": "^1.0.0",
@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
+    "dotenv-cli": "^11.0.0",
     "electron": "^42.0.0",
     "electron-builder": "^26.0.12",
     "framer-motion": "^12.23.24",
