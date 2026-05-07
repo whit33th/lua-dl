@@ -3,8 +3,7 @@
 A desktop application for easily downloading games and applications from Steam and other platforms.
 
 <div style="width: 100%; display: flex; justify-content: center;">
-  <img 
-    src="https://github.com/user-attachments/assets/bb59ca2f-8a01-4066-8d64-4f22760cb7eb"
+  <img width="1925" height="1084" alt="image" src="https://github.com/user-attachments/assets/a680f874-77bf-45e8-9d88-192a02f2ce4c"
     style="width: 100%; max-width: 100%; height: auto; object-fit: contain;"
   />
 </div>
