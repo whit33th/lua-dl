@@ -1,6 +1,6 @@
 # lua-dl Desktop
 
-A desktop application for easily downloading games and applications from Steam and other platforms.
+A desktop application for easily downloading games and applications from Steam Servers.
 
 <div style="width: 100%; display: flex; justify-content: center;">
   <img width="1925" height="1084" alt="image" src="https://github.com/user-attachments/assets/a680f874-77bf-45e8-9d88-192a02f2ce4c"
