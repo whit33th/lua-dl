@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -79,7 +80,11 @@ func extractUploadSlug(ctx context.Context, client *http.Client, pageURL string)
 	if m == nil {
 		return "", errors.New("no uploads.online-fix.me link on game page")
 	}
-	return m[1], nil
+	slug, err := url.PathUnescape(m[1])
+	if err != nil {
+		return "", err
+	}
+	return slug, nil
 }
 
 // rarHrefRE picks .rar entries out of nginx autoindex HTML. Each file shows

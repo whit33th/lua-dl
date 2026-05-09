@@ -19,6 +19,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -27,6 +28,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"golang.org/x/term"
@@ -107,6 +109,9 @@ func pick(gameName string, results []result) (result, bool) {
 	if len(results) == 1 {
 		return results[0], true
 	}
+	if exact, ok := exactMatch(gameName, results); ok {
+		return exact, true
+	}
 	items := make([]picker.Item, len(results))
 	for i, r := range results {
 		items[i] = picker.Item{Label: r.Title, Selected: i == 0}
@@ -121,6 +126,24 @@ func pick(gameName string, results []result) (result, bool) {
 		}
 	}
 	return result{}, false
+}
+
+func exactMatch(gameName string, results []result) (result, bool) {
+	want := normalizeTitle(gameName)
+	for _, r := range results {
+		if normalizeTitle(r.Title) == want {
+			return r, true
+		}
+	}
+	return result{}, false
+}
+
+func normalizeTitle(title string) string {
+	title = strings.ToLower(strings.TrimSpace(title))
+	for _, suffix := range []string{" по сети", " po seti"} {
+		title = strings.TrimSpace(strings.TrimSuffix(title, suffix))
+	}
+	return title
 }
 
 func askYesNo(prompt string) bool {
@@ -158,7 +181,26 @@ func login(ctx context.Context, client *http.Client) error {
 	if res.StatusCode != 200 {
 		return fmt.Errorf("POST %s/: HTTP %d", siteURL, res.StatusCode)
 	}
+	if !hasCookie(client, "dle_user_id") || !hasCookie(client, "dle_password") {
+		return fmt.Errorf("credentials were not accepted")
+	}
 	return nil
+}
+
+func hasCookie(client *http.Client, name string) bool {
+	if client.Jar == nil {
+		return false
+	}
+	u, err := url.Parse(siteURL + "/")
+	if err != nil {
+		return false
+	}
+	for _, c := range client.Jar.Cookies(u) {
+		if c.Name == name && c.Value != "" {
+			return true
+		}
+	}
+	return false
 }
 
 type loginToken struct {
@@ -187,6 +229,24 @@ func authToken(ctx context.Context, client *http.Client) (loginToken, error) {
 		return loginToken{}, err
 	}
 	body := strings.TrimSpace(string(raw))
+	name, value := parseAuthToken(body)
+	if name == "" || value == "" {
+		return loginToken{}, fmt.Errorf("auth token response did not contain a login token")
+	}
+	return loginToken{name: name, value: value}, nil
+}
+
+func parseAuthToken(body string) (string, string) {
+	var payload struct {
+		Field string `json:"field"`
+		Value string `json:"value"`
+	}
+	if err := json.Unmarshal([]byte(body), &payload); err == nil && payload.Field != "" && payload.Value != "" {
+		return payload.Field, html.UnescapeString(payload.Value)
+	}
+	if m := tokenJSONRE.FindStringSubmatch(body); m != nil {
+		return m[1], unescapeTokenValue(m[2])
+	}
 	name := tokenNameRE.FindString(body)
 	value := ""
 	if m := tokenValueRE.FindStringSubmatch(body); m != nil {
@@ -197,13 +257,19 @@ func authToken(ctx context.Context, client *http.Client) (loginToken, error) {
 			}
 		}
 	}
-	if name == "" || value == "" {
-		return loginToken{}, fmt.Errorf("auth token response did not contain a login token")
+	return name, html.UnescapeString(value)
+}
+
+func unescapeTokenValue(value string) string {
+	unquoted, err := strconv.Unquote(`"` + strings.ReplaceAll(value, `"`, `\"`) + `"`)
+	if err != nil {
+		unquoted = value
 	}
-	return loginToken{name: name, value: html.UnescapeString(value)}, nil
+	return html.UnescapeString(unquoted)
 }
 
 var (
+	tokenJSONRE  = regexp.MustCompile(`"(token_[0-9a-f]+)"\s*:\s*"([^"]+)"`)
 	tokenNameRE  = regexp.MustCompile(`token_[0-9a-f]+`)
 	tokenValueRE = regexp.MustCompile(`(?i)"(?:value|token)"\s*:\s*"([^"]+)"|value=['"]([^'"]+)`)
 )
