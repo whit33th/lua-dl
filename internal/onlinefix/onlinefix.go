@@ -6,7 +6,7 @@
 //  1. /index.php?do=search&story=<name>           → game page URLs
 //  2. /games/<genre>/<id>-<slug>.html             → uploads folder slug
 //  3. uploads.online-fix.me:2053/uploads/<slug>/  → seed online_fix_auth cookie
-//  4.   .../Fix Repair/                           → list the .rar(s)
+//  4. .../Fix Repair/                           → list the .rar(s)
 //  5. GET each .rar, extract, copy into gameDir
 //
 // Every request to uploads.online-fix.me needs a Referer pointing at the
@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -35,11 +36,10 @@ import (
 	"github.com/hoangvu12/lua-dl/internal/ui"
 )
 
-// Baked subscriber session. Rotate both consts when errors start flashing
-// "session cookies may have expired".
 const (
-	sessionCookies = "SITE_TOTAL_ID=6855e127e2eb867851ee3c2b764f0137; dle_user_id=4600624; dle_password=0465b7c359b0776c82bf6b9a3e02387a; PHPSESSID=psjpb0qj2tfc3kjsj64hdb1n62; cf_clearance=hryVqoCYBF29gbQ6an6Wu6_9dgS3f3Y1vx.E3aucDBE-1776138584-1.2.1.1-4.TwpNjkPm.1v1ye06wAit3vEQquBZ7Yde5lxh6uJ2uKogaJlQxsYyZSdAy1bKfXskm5gjK70i2o0LSpC.ilmaWYT7te4j41IJ4.k_qSoznTyPo9jmqUcQsCFZL8MwohytihnZqeTa5nJ56pWM6G3V8ZpLPyVwu5G_AusASDKXEJdKK3mtQHEJW6SWshuRzjzbK16fFPOP932vdWylM7Osto3GHVGSyNYsBA2WJinR1vnCW4U4nKunI65CKk.JjZmsElDxKTiH.DnK9VnqfqSiF3CE7zUD3Dc9oXjfaXF0LjFV9mrRzamI9NowPV9URMSTSW51MHkf08PV4PPVSwDw"
-	userAgent      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+	loginUsername = "luadl"
+	loginPassword = "NwbVPVj6pQmY4Z9D"
+	userAgent     = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
 
 	siteURL     = "https://online-fix.me"
 	uploadsBase = "https://uploads.online-fix.me:2053"
@@ -69,6 +69,11 @@ func Offer(ctx context.Context, gameName, gameDir string) (bool, error) {
 		return false, nil
 	}
 	client := &http.Client{Jar: jar}
+	if err := login(ctx, client); err != nil {
+		ui.Phase("Online-Fix")
+		ui.LastStep(fmt.Sprintf("login failed: %v", err))
+		return false, nil
+	}
 
 	results, err := search(ctx, client, gameName)
 	if err != nil {
@@ -128,19 +133,100 @@ func askYesNo(prompt string) bool {
 	return ans == "" || ans == "y" || ans == "yes"
 }
 
-// get forwards the baked cookies+UA and a Referer (uploads.online-fix.me
-// rejects requests without one; the initial search is the only call that
-// can pass an empty referer).
+func login(ctx context.Context, client *http.Client) error {
+	token, err := authToken(ctx, client)
+	if err != nil {
+		return err
+	}
+	form := url.Values{
+		"login_name":     {loginUsername},
+		"login_password": {loginPassword},
+		"login":          {"submit"},
+		token.name:       {token.value},
+	}
+	req, err := http.NewRequestWithContext(ctx, "POST", siteURL+"/", strings.NewReader(form.Encode()))
+	if err != nil {
+		return err
+	}
+	setBrowserHeaders(req, siteURL+"/")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return fmt.Errorf("POST %s/: HTTP %d", siteURL, res.StatusCode)
+	}
+	return nil
+}
+
+type loginToken struct {
+	name  string
+	value string
+}
+
+func authToken(ctx context.Context, client *http.Client) (loginToken, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", siteURL+"/engine/ajax/authtoken.php", nil)
+	if err != nil {
+		return loginToken{}, err
+	}
+	setBrowserHeaders(req, siteURL+"/")
+	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	res, err := client.Do(req)
+	if err != nil {
+		return loginToken{}, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return loginToken{}, fmt.Errorf("GET auth token: HTTP %d", res.StatusCode)
+	}
+	raw, err := io.ReadAll(res.Body)
+	if err != nil {
+		return loginToken{}, err
+	}
+	body := strings.TrimSpace(string(raw))
+	name := tokenNameRE.FindString(body)
+	value := ""
+	if m := tokenValueRE.FindStringSubmatch(body); m != nil {
+		for _, group := range m[1:] {
+			if group != "" {
+				value = group
+				break
+			}
+		}
+	}
+	if name == "" || value == "" {
+		return loginToken{}, fmt.Errorf("auth token response did not contain a login token")
+	}
+	return loginToken{name: name, value: html.UnescapeString(value)}, nil
+}
+
+var (
+	tokenNameRE  = regexp.MustCompile(`token_[0-9a-f]+`)
+	tokenValueRE = regexp.MustCompile(`(?i)"(?:value|token)"\s*:\s*"([^"]+)"|value=['"]([^'"]+)`)
+)
+
+func setBrowserHeaders(req *http.Request, referer string) {
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Pragma", "no-cache")
+	if referer != "" {
+		req.Header.Set("Referer", referer)
+	}
+}
+
+// get forwards the UA and a Referer (uploads.online-fix.me rejects requests
+// without one; the initial search is the only call that can pass an empty
+// referer). Authentication cookies are carried by the client's cookie jar.
 func get(ctx context.Context, client *http.Client, url, referer string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Cookie", sessionCookies)
-	if referer != "" {
-		req.Header.Set("Referer", referer)
-	}
+	setBrowserHeaders(req, referer)
 	return client.Do(req)
 }
 
@@ -154,7 +240,7 @@ func fetchString(ctx context.Context, client *http.Client, pageURL, referer stri
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return "", fmt.Errorf("GET %s: HTTP %d (session cookies may have expired)", pageURL, res.StatusCode)
+		return "", fmt.Errorf("GET %s: HTTP %d", pageURL, res.StatusCode)
 	}
 	raw, err := io.ReadAll(res.Body)
 	if err != nil {
