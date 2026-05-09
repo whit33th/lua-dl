@@ -30,6 +30,14 @@ var ErrCancelled = errors.New("picker: cancelled")
 // If stderr is not a terminal it returns an error — the caller should have
 // already guarded with term.IsTerminal.
 func Run(title string, items []Item) ([]Item, error) {
+	return run(title, items, false)
+}
+
+func RunSingle(title string, items []Item) ([]Item, error) {
+	return run(title, items, true)
+}
+
+func run(title string, items []Item, single bool) ([]Item, error) {
 	fd := int(os.Stdin.Fd())
 	if !term.IsTerminal(fd) {
 		return nil, errors.New("picker: stdin is not a terminal")
@@ -56,7 +64,7 @@ func Run(title string, items []Item) ([]Item, error) {
 	lastLines := 0
 	buf := make([]byte, 8)
 	for {
-		out := render(title, items, cursor)
+		out := render(title, items, cursor, single)
 		// Visual rows == number of "\n" in the output (render ends without
 		// a trailing newline, so final line doesn't count against the move).
 		lines := strings.Count(out, "\n") + 1
@@ -95,9 +103,16 @@ func Run(title string, items []Item) ([]Item, error) {
 			cursor = moveCursor(items, cursor, +1)
 		case ' ':
 			if !items[cursor].Locked {
-				items[cursor].Selected = !items[cursor].Selected
+				if single {
+					selectOnly(items, cursor)
+				} else {
+					items[cursor].Selected = !items[cursor].Selected
+				}
 			}
 		case 'a':
+			if single {
+				continue
+			}
 			for i := range items {
 				items[i].Selected = true
 			}
@@ -114,6 +129,14 @@ func Run(title string, items []Item) ([]Item, error) {
 		case 'q', 0x03 /* ctrl-c */, 0x1b /* bare ESC */ :
 			clearFrame(lastLines)
 			return nil, ErrCancelled
+		}
+	}
+}
+
+func selectOnly(items []Item, selected int) {
+	for i := range items {
+		if !items[i].Locked {
+			items[i].Selected = i == selected
 		}
 	}
 }
@@ -140,11 +163,15 @@ func clearFrame(lines int) {
 	}
 }
 
-func render(title string, items []Item, cursor int) string {
+func render(title string, items []Item, cursor int, single bool) string {
 	var b strings.Builder
 	b.WriteString(title)
 	b.WriteString("\r\n")
-	b.WriteString("  \x1b[2m↑/↓ move · space toggle · a all · n none · enter confirm · q cancel\x1b[0m\r\n")
+	if single {
+		b.WriteString("  \x1b[2m↑/↓ move · space choose · enter confirm · q cancel\x1b[0m\r\n")
+	} else {
+		b.WriteString("  \x1b[2m↑/↓ move · space toggle · a all · n none · enter confirm · q cancel\x1b[0m\r\n")
+	}
 	b.WriteString("\r\n")
 
 	var selCount int

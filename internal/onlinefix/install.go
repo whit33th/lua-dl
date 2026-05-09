@@ -110,6 +110,9 @@ func downloadRAR(ctx context.Context, client *http.Client, url, referer, dst, di
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
+		if res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
+			return fmt.Errorf("online-fix download is unavailable or closed for this game (HTTP %d)", res.StatusCode)
+		}
 		return fmt.Errorf("GET %s: HTTP %d", url, res.StatusCode)
 	}
 	f, err := os.Create(dst)

@@ -116,7 +116,7 @@ func pick(gameName string, results []result) (result, bool) {
 	for i, r := range results {
 		items[i] = picker.Item{Label: r.Title, Selected: i == 0}
 	}
-	picked, err := picker.Run(fmt.Sprintf("\r\nMultiple fixes matched %q. Pick one:", gameName), items)
+	picked, err := picker.RunSingle(fmt.Sprintf("\r\nMultiple fixes matched %q. Pick one:", gameName), items)
 	if err != nil {
 		return result{}, false
 	}
@@ -306,6 +306,9 @@ func fetchString(ctx context.Context, client *http.Client, pageURL, referer stri
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
+		if strings.Contains(pageURL, "uploads.online-fix.me") && (res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden) {
+			return "", fmt.Errorf("online-fix upload is unavailable or closed for this game (HTTP %d)", res.StatusCode)
+		}
 		return "", fmt.Errorf("GET %s: HTTP %d", pageURL, res.StatusCode)
 	}
 	raw, err := io.ReadAll(res.Body)
