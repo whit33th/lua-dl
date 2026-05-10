@@ -1,13 +1,19 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Check, X } from "lucide-react";
+import { extractPromptMeta } from "@/lib/prompt-meta";
 import { useAppStore } from "@/lib/store";
+import { useEffect, useRef } from "react";
+import {
+  PickerPromptActions,
+  StdinPromptForm,
+  YesNoPromptActions,
+} from "./prompt-actions";
 
 export function PromptModal() {
-  const [textValue, setTextValue] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const prompt = useAppStore((state) => state.cli.prompt);
+  const phase = useAppStore((state) => state.cli.phase);
+  const logs = useAppStore((state) => state.logs);
   const sessionId = useAppStore((state) => state.activeSessionId);
 
   useEffect(() => {
@@ -26,15 +32,14 @@ export function PromptModal() {
     }
   }
 
-  function submitText(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (textValue.trim()) {
-      write(`${textValue}\r`);
-      setTextValue("");
-    }
-  }
-
-  const { title, subtitle } = extractPromptMeta(prompt.kind, prompt.text);
+  const { title, subtitle } = extractPromptMeta(prompt.kind, prompt.text, {
+    phase,
+    recentText: logs
+      .filter((log) => log.sessionId === sessionId)
+      .slice(-8)
+      .map((log) => log.text)
+      .join("\n"),
+  });
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-md">
@@ -56,137 +61,13 @@ export function PromptModal() {
         </pre>
 
         {prompt.kind === "yes-no" ? (
-          <div className="mt-3.5 flex flex-wrap gap-2.5">
-            <button
-              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("y\r")}
-            >
-              <Check size={17} aria-hidden="true" />
-              Yes
-            </button>
-            <button
-              className="border-line-strong text-text inline-flex items-center justify-center gap-2.25 rounded-4xl border bg-black px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("n\r")}
-            >
-              <X size={17} aria-hidden="true" />
-              No
-            </button>
-          </div>
+          <YesNoPromptActions onWrite={write} />
         ) : prompt.kind === "picker" ? (
-          <div className="mt-3.5 flex flex-wrap gap-2.5">
-            <button
-              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("\u001b[A")}
-              aria-label="Move selection up"
-            >
-              <ArrowUp size={17} aria-hidden="true" />
-            </button>
-            <button
-              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("\u001b[B")}
-              aria-label="Move selection down"
-            >
-              <ArrowDown size={17} aria-hidden="true" />
-            </button>
-            <button
-              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write(" ")}
-            >
-              Toggle
-            </button>
-            <button
-              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("a")}
-            >
-              All
-            </button>
-            <button
-              className="border-line-strong bg-panel-strong text-text min-h-10.5 rounded-4xl border px-3.25 py-0 transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("n")}
-            >
-              None
-            </button>
-            <button
-              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
-              type="button"
-              onClick={() => write("\r")}
-            >
-              Confirm
-            </button>
-          </div>
+          <PickerPromptActions onWrite={write} />
         ) : (
-          <form
-            className="mt-3.5 grid grid-cols-[1fr_auto] flex-wrap gap-2.5"
-            onSubmit={submitText}
-          >
-            <input
-              value={textValue}
-              onChange={(event) => setTextValue(event.target.value)}
-              autoFocus
-              className="border-line-strong text-text min-w-0 rounded-4xl border bg-black px-3 py-2"
-            />
-            <button
-              className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
-              type="submit"
-            >
-              Send
-            </button>
-          </form>
+          <StdinPromptForm onWrite={write} />
         )}
       </div>
     </div>
   );
-}
-
-function extractPromptMeta(kind: string, text: string): { title: string; subtitle: string } {
-  if (kind === "picker") {
-    return { title: "Select content to download", subtitle: "Choose depots" };
-  }
-
-  if (kind === "yes-no") {
-    // Try to find the actual question line containing [Y/n]
-    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-    const questionLine = lines.find((l) => /\[(y\/n|Y\/n|y\/N)\]/i.test(l));
-
-    if (questionLine) {
-      // Strip the [Y/n] part and trailing colon/spaces
-      const clean = questionLine.replace(/\s*\[(y\/n|Y\/n|y\/N)\]\s*:?\s*$/i, "").trim();
-
-      if (/install now/i.test(clean)) {
-        return { title: "Install next package?", subtitle: "Confirmation required" };
-      }
-      if (/online fix|crack|patch/i.test(clean)) {
-        return { title: "Apply online fix / patch?", subtitle: "Confirmation required" };
-      }
-      if (/continue/i.test(clean)) {
-        return { title: "Continue installation?", subtitle: "Confirmation required" };
-      }
-      if (/update/i.test(clean)) {
-        return { title: "Apply update?", subtitle: "Confirmation required" };
-      }
-      if (/download/i.test(clean)) {
-        return { title: "Start download?", subtitle: "Confirmation required" };
-      }
-      if (clean.length > 0 && clean.length < 80) {
-        return { title: clean, subtitle: "Confirmation required" };
-      }
-    }
-    return { title: "Confirm to continue", subtitle: "Confirmation required" };
-  }
-
-  // stdin
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  const lastLine = lines.at(-1) ?? "";
-  const clean = lastLine.replace(/:?\s*$/, "").trim();
-  return {
-    title: clean.length > 0 && clean.length < 80 ? clean : "Enter a value",
-    subtitle: "Input required",
-  };
 }

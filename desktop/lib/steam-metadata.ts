@@ -50,22 +50,39 @@ export type SteamSearchResult = {
   tiny_image: string;
 };
 
+const searchCache = new Map<
+  string,
+  { expiresAt: number; results: SteamSearchResult[] }
+>();
+const searchCacheTtlMs = 5 * 60 * 1000;
+
 export async function searchSteamGames(
   term: string,
 ): Promise<SteamSearchResult[]> {
-  if (term.length < 2) return [];
+  const query = term.trim().toLowerCase();
+  if (query.length < 2) return [];
+
+  const cached = searchCache.get(query);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.results;
+  }
 
   const response = await fetch(
     `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(
-      term,
+      query,
     )}&l=english&cc=US`,
   );
   if (!response.ok) return [];
 
   const data = await response.json();
-  return (data?.items || []).map((item: any) => ({
+  const results = (data?.items || []).map((item: any) => ({
     id: item.id,
     name: item.name,
     tiny_image: item.tiny_image,
   }));
+  searchCache.set(query, {
+    expiresAt: Date.now() + searchCacheTtlMs,
+    results,
+  });
+  return results;
 }

@@ -1,12 +1,13 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Loader2, Search } from "lucide-react";
-import { parseSteamAppId } from "@/lib/cli-parser";
-import { searchSteamGames, type SteamSearchResult } from "@/lib/steam-metadata";
+import { useSteamGameSearch } from "@/hooks/use-steam-game-search";
+import { parseSteamAppId } from "@/lib/steam-app-id";
+import type { SteamSearchResult } from "@/lib/steam-metadata";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { Border } from "./ui/Squire-Border";
+import { ArrowRight, Loader2, Search } from "lucide-react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { SteamSearchResults } from "./steam-search-results";
+import { Border } from "./ui/border";
 
 type AppIdEntryProps = {
   onSubmit(appId: string): void;
@@ -23,52 +24,26 @@ export function AppIdEntry({
 }: AppIdEntryProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
-  const [results, setResults] = useState<SteamSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const skipSearchRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { results, isSearching, clearResults } = useSteamGameSearch(value);
+
+  useEffect(() => {
+    setShowDropdown(results.length > 0);
+    setSelectedIndex(results.length > 0 ? 0 : -1);
+  }, [results]);
 
   useEffect(() => {
     if (selectedIndex >= 0 && scrollContainerRef.current) {
-      const activeElement = scrollContainerRef.current.children[selectedIndex] as HTMLElement;
-      if (activeElement) {
-        activeElement.scrollIntoView({
-          block: "nearest",
-        });
-      }
+      const activeElement = scrollContainerRef.current.children[
+        selectedIndex
+      ] as HTMLElement;
+      activeElement?.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
 
-  useEffect(() => {
-    if (skipSearchRef.current) {
-      skipSearchRef.current = false;
-      return;
-    }
-
-    if (value.length < 2) {
-      setResults([]);
-      setShowDropdown(false);
-      setSelectedIndex(-1);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setIsSearching(true);
-      void searchSteamGames(value)
-        .then((data) => {
-          setResults(data);
-          setShowDropdown(data.length > 0);
-          setSelectedIndex(data.length > 0 ? 0 : -1);
-        })
-        .finally(() => setIsSearching(false));
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [value]);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (showDropdown && selectedIndex >= 0 && results[selectedIndex]) {
       handleSelect(results[selectedIndex]);
@@ -77,35 +52,40 @@ export function AppIdEntry({
 
     const appId = parseSteamAppId(value);
     if (!appId) {
-      setError("Enter a numeric Steam App ID or select from results.");
+      setError("Select a game from search results.");
       return;
     }
+
     setError("");
-    skipSearchRef.current = true;
-    onSubmit(appId);
     setShowDropdown(false);
-    setResults([]);
+    clearResults();
+    onSubmit(appId);
+    setValue("");
   }
 
   function handleSelect(result: SteamSearchResult) {
-    skipSearchRef.current = true;
-    setValue(result.id.toString());
-    onSubmit(result.id.toString());
+    const appId = result.id.toString();
+    setValue("");
     setShowDropdown(false);
-    setResults([]);
     setSelectedIndex(-1);
     setError("");
+    clearResults();
+    onSubmit(appId);
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (!showDropdown || results.length === 0) return;
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!showDropdown || results.length === 0) {
+      return;
+    }
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setSelectedIndex((prev) => (prev + 1) % results.length);
+      setSelectedIndex((previous) => (previous + 1) % results.length);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
+      setSelectedIndex(
+        (previous) => (previous - 1 + results.length) % results.length,
+      );
     } else if (event.key === "Escape") {
       setShowDropdown(false);
     }
@@ -120,14 +100,14 @@ export function AppIdEntry({
       >
         <Border />
         <label className="sr-only" htmlFor="app-id">
-          Steam App ID or Name
+          Game name
         </label>
-        <div className="flex items-center pl-4 text-text/40">
+        <div className="text-text/40 flex items-center pl-4">
           <Search size={20} />
         </div>
         <input
           id="app-id"
-          placeholder="Steam Game ID or Name"
+          placeholder="Game name"
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
@@ -145,10 +125,10 @@ export function AppIdEntry({
           aria-label="Inspect App ID"
           disabled={disabled || isLoading || !value}
           className={cn(
-            "relative flex h-16 w-auto items-center aspect-square justify-center border-l border-line transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-42",
+            "border-line relative flex aspect-square h-16 w-auto items-center justify-center border-l transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-42",
             value && !isLoading && !disabled
               ? "bg-text text-black hover:bg-white"
-              : "bg-black text-text/40 hover:bg-white/10 hover:text-text",
+              : "text-text/40 hover:text-text bg-transparent hover:bg-white/10",
           )}
         >
           {isLoading || isSearching ? (
@@ -159,54 +139,15 @@ export function AppIdEntry({
         </button>
       </form>
 
-      {/* Results Dropdown */}
-      {showDropdown && results.length > 0 && !disabled && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowDropdown(false)}
-          />
-          <div
-            ref={scrollContainerRef}
-            className={cn(
-              "border-line absolute top-full left-0 z-50 mt-2 w-full max-h-72 overflow-y-auto rounded-b-xl border p-2 shadow-2xl backdrop-blur-xl",
-              isSplash ? "bg-black/60" : "bg-black/80",
-            )}
-          >
-            {results.map((result, index) => (
-              <button
-                key={result.id}
-                onClick={() => handleSelect(result)}
-                className={cn(
-                  "flex w-full items-center gap-4 rounded-xs p-2 text-left transition-colors",
-                  selectedIndex === index
-                    ? "bg-white/20 shadow-lg"
-                    : "hover:bg-white/10",
-                )}
-              >
-                <div className="relative aspect-8/3 flex-none overflow-hidden border border-white/10 bg-black/40">
-                  <Image
-                    width={120}
-                    height={45}
-                    src={result.tiny_image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="eager"
-                  />
-                </div>
-                <div className="flex min-w-0 flex-col">
-                  <span className="text-text truncate text-sm font-bold">
-                    {result.name}
-                  </span>
-                  <span className="text-dim text-[10px] font-mono">
-                    ID: {result.id}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      <SteamSearchResults
+        results={results}
+        isOpen={showDropdown && !disabled}
+        isSplash={isSplash}
+        selectedIndex={selectedIndex}
+        scrollContainerRef={scrollContainerRef}
+        onSelect={handleSelect}
+        onDismiss={() => setShowDropdown(false)}
+      />
 
       {error ? (
         <p

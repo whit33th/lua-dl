@@ -1,19 +1,19 @@
-import { LucideIcon } from "lucide-react";
+﻿import { LucideIcon } from "lucide-react";
 
-interface IFrameButton {
+interface WindowFrameButtonProps {
   icon: LucideIcon;
   onClick?: () => void;
   height?: number;
   width?: number;
   type?: "close" | "minimize" | "restore";
 }
-export default function FrameButton({
+export default function WindowFrameButton({
   icon: Icon,
   onClick,
   height,
   width,
   type,
-}: IFrameButton) {
+}: WindowFrameButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -23,3 +23,4 @@ export default function FrameButton({
     </button>
   );
 }
+

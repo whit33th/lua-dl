@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useGamesLibrarySetup } from "@/hooks/use-games-library-setup";
 import { useAppStore } from "@/lib/store";
 
 type SettingsPanelProps = {
@@ -13,17 +14,15 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const setVerbose = useAppStore((state) => state.setVerbose);
   const setKeepRawLogs = useAppStore((state) => state.setKeepRawLogs);
   const setDensity = useAppStore((state) => state.setDensity);
-  const setOutputDir = useAppStore((state) => state.setOutputDir);
+  const { chooseAndPrepareLibrary, isSelectingLibrary } =
+    useGamesLibrarySetup();
 
   if (!isOpen) {
     return null;
   }
 
   async function chooseDirectory() {
-    const result = await window.luaDl?.chooseDirectory();
-    if (!result?.canceled && result?.path) {
-      setOutputDir(result.path);
-    }
+    await chooseAndPrepareLibrary();
   }
 
   return (
@@ -105,8 +104,9 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             className="border-line text-text hover:border-text w-full overflow-hidden rounded-4xl border bg-black p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
             type="button"
             onClick={chooseDirectory}
+            disabled={isSelectingLibrary}
           >
-            {settings.outputDir || "Default downloads folder"}
+            {settings.outputDir || "Games library folder"}
           </button>
         </div>
       </aside>

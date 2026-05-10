@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 import { Minus, Settings, Square, X, RefreshCw, AlertCircle, CheckCircle2, Download } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-import FrameButton from "./frame-btn";
+import WindowFrameButton from "./window-frame-button";
 
-export default function Frame() {
+export default function WindowFrame() {
   return (
     <header
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
@@ -25,23 +25,23 @@ export default function Frame() {
         <UpdateIndicator />
 
         <div className="flex items-center">
-          <FrameButton
+          <WindowFrameButton
             height={18}
             width={18}
             icon={Minus}
-            onClick={() => (window as any).api.minimize()}
+            onClick={() => window.api.minimize()}
           />
-          <FrameButton
+          <WindowFrameButton
             height={12}
             width={12}
             icon={Square}
-            onClick={() => (window as any).api.maximize()}
+            onClick={() => window.api.maximize()}
           />
-          <FrameButton
+          <WindowFrameButton
             height={18}
             width={18}
             icon={X}
-            onClick={() => (window as any).api.close()}
+            onClick={() => window.api.close()}
             type="close"
           />
         </div>
@@ -98,3 +98,4 @@ function UpdateIndicator() {
     </button>
   );
 }
+

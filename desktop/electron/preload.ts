@@ -8,6 +8,11 @@ contextBridge.exposeInMainWorld("luaDl", {
     ipcRenderer.invoke("go:write", sessionId, input),
   kill: (sessionId: string) => ipcRenderer.invoke("go:kill", sessionId),
   chooseDirectory: () => ipcRenderer.invoke("dialog:choose-directory"),
+  addDefenderExclusion: (path: string) =>
+    ipcRenderer.invoke("security:add-defender-exclusion", path),
+  ensureDirectory: (path: string) =>
+    ipcRenderer.invoke("fs:ensure-directory", path),
+  openFolder: (path: string) => ipcRenderer.invoke("shell:open-folder", path),
   onEvent: (callback: (event: CliEvent) => void) => {
     const listener = (_event: Electron.IpcRendererEvent, payload: CliEvent) =>
       callback(payload);

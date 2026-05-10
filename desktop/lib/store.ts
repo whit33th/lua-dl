@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { CliEvent } from "@/electron/ipc-contract";
-import type { DepotOption, LogEntry, ParsedCliState } from "./cli-parser";
-import { cliEventToLog, reduceCliState } from "./cli-parser";
+import type { DepotOption, LogEntry, ParsedCliState } from "./cli-types";
+import { cliEventToLog } from "./cli-logs";
+import { reduceCliState } from "./cli-state";
 import type { SteamMetadata } from "./steam-metadata";
 import type { UpdateEvent } from "@/electron/ipc-contract";
 
@@ -32,6 +34,7 @@ type AppState = {
   selectedDepots: string[];
   downloadAll: boolean;
   settings: DesktopSettings;
+  hasCompletedSetup: boolean;
   updateState: UpdateEvent;
   isUpdateModalOpen: boolean;
   setAppId(appId: string): void;
@@ -44,6 +47,7 @@ type AppState = {
   toggleDepot(depotId: string): void;
   setDownloadAll(value: boolean): void;
   setOutputDir(path: string): void;
+  setSetupComplete(value: boolean): void;
   setVerbose(value: boolean): void;
   setKeepRawLogs(value: boolean): void;
   setDensity(value: DesktopSettings["density"]): void;
@@ -55,82 +59,98 @@ const defaultCliState: ParsedCliState = {
   depots: [],
 };
 
-export const useAppStore = create<AppState>((set) => ({
-  mode: "idle",
-  appId: "",
-  logs: [],
-  cli: defaultCliState,
-  selectedDepots: [],
-  downloadAll: true,
-  settings: {
-    outputDir: "",
-    verbose: false,
-    keepRawLogs: true,
-    density: "comfortable",
-  },
-  updateState: { type: "not-available" },
-  isUpdateModalOpen: false,
-  setAppId: (appId) => set({ appId }),
-  setMetadata: (metadata) => set({ metadata }),
-  setMode: (mode) => set({ mode }),
-  setActiveSession: (activeSessionId) => set({ activeSessionId }),
-  ingestEvent: (event) =>
-    set((state) => {
-      const log = cliEventToLog(event);
-      const cli = reduceCliState(state.cli, event);
-      const depots = cli.depots;
-      const selectedDepots = ensureDepotSelection(state.selectedDepots, depots);
-      return {
-        cli,
-        selectedDepots,
-        logs: log ? [...state.logs, log].slice(-600) : state.logs,
-        activeSessionId:
-          event.type === "exit" ||
-          event.type === "error" ||
-          (event.type === "state" && event.status === "killed")
-            ? undefined
-            : state.activeSessionId,
-        mode: inferMode(state.mode, event),
-      };
-    }),
-  clearRun: () =>
-    set({
-      metadata: undefined,
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      mode: "idle",
+      appId: "",
       logs: [],
       cli: defaultCliState,
       selectedDepots: [],
-      activeSessionId: undefined,
+      downloadAll: true,
+      settings: {
+        outputDir: "",
+        verbose: false,
+        keepRawLogs: true,
+        density: "comfortable",
+      },
+      updateState: { type: "not-available" },
+      isUpdateModalOpen: false,
+      hasCompletedSetup: false,
+      setAppId: (appId) => set({ appId }),
+      setMetadata: (metadata) => set({ metadata }),
+      setMode: (mode) => set({ mode }),
+      setActiveSession: (activeSessionId) => set({ activeSessionId }),
+      ingestEvent: (event) =>
+        set((state) => {
+          const log = cliEventToLog(event);
+          const cli = reduceCliState(state.cli, event);
+          const depots = cli.depots;
+          const selectedDepots = ensureDepotSelection(
+            state.selectedDepots,
+            depots,
+          );
+          return {
+            cli,
+            selectedDepots,
+            logs: log ? [...state.logs, log].slice(-600) : state.logs,
+            activeSessionId:
+              event.type === "exit" ||
+              event.type === "error" ||
+              (event.type === "state" && event.status === "killed")
+                ? undefined
+                : state.activeSessionId,
+            mode: inferMode(state.mode, event),
+          };
+        }),
+      clearRun: () =>
+        set({
+          metadata: undefined,
+          logs: [],
+          cli: defaultCliState,
+          selectedDepots: [],
+          activeSessionId: undefined,
+        }),
+      clearLogs: () =>
+        set({
+          logs: [],
+        }),
+      toggleDepot: (depotId) =>
+        set((state) => ({
+          selectedDepots: state.selectedDepots.includes(depotId)
+            ? state.selectedDepots.filter((id) => id !== depotId)
+            : [...state.selectedDepots, depotId],
+        })),
+      setDownloadAll: (downloadAll) => set({ downloadAll }),
+      setOutputDir: (outputDir) =>
+        set((state) => ({
+          settings: { ...state.settings, outputDir },
+        })),
+      setSetupComplete: (hasCompletedSetup) => set({ hasCompletedSetup }),
+      setVerbose: (verbose) =>
+        set((state) => ({
+          settings: { ...state.settings, verbose },
+        })),
+      setKeepRawLogs: (keepRawLogs) =>
+        set((state) => ({
+          settings: { ...state.settings, keepRawLogs },
+        })),
+      setDensity: (density) =>
+        set((state) => ({
+          settings: { ...state.settings, density },
+        })),
+      setUpdateState: (updateState) => set({ updateState }),
+      setUpdateModalOpen: (open) => set({ isUpdateModalOpen: open }),
     }),
-  clearLogs: () =>
-    set({
-      logs: [],
-    }),
-  toggleDepot: (depotId) =>
-    set((state) => ({
-      selectedDepots: state.selectedDepots.includes(depotId)
-        ? state.selectedDepots.filter((id) => id !== depotId)
-        : [...state.selectedDepots, depotId],
-    })),
-  setDownloadAll: (downloadAll) => set({ downloadAll }),
-  setOutputDir: (outputDir) =>
-    set((state) => ({
-      settings: { ...state.settings, outputDir },
-    })),
-  setVerbose: (verbose) =>
-    set((state) => ({
-      settings: { ...state.settings, verbose },
-    })),
-  setKeepRawLogs: (keepRawLogs) =>
-    set((state) => ({
-      settings: { ...state.settings, keepRawLogs },
-    })),
-  setDensity: (density) =>
-    set((state) => ({
-      settings: { ...state.settings, density },
-    })),
-  setUpdateState: (updateState) => set({ updateState }),
-  setUpdateModalOpen: (open) => set({ isUpdateModalOpen: open }),
-}));
+    {
+      name: "lua-dl-desktop-settings",
+      partialize: (state) => ({
+        settings: state.settings,
+        hasCompletedSetup: state.hasCompletedSetup,
+      }),
+    },
+  ),
+);
 
 function ensureDepotSelection(selected: string[], depots: DepotOption[]) {
   if (selected.length > 0 || depots.length === 0) {

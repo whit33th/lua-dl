@@ -1,4 +1,4 @@
-import {
+﻿import {
   app,
   BrowserWindow,
   dialog,
@@ -9,7 +9,9 @@ import {
 } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log/main";
+import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
+import { addDefenderExclusion } from "./defender-exclusions";
 import { GoSessionManager } from "./go-session";
 import { getAppIndexPath } from "./paths";
 import type { StartOptions } from "./ipc-contract";
@@ -143,6 +145,98 @@ function registerIpcHandlers(manager: GoSessionManager) {
     };
   });
 
+  ipcMain.handle("fs:ensure-directory", async (_event, value: unknown) => {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error("Directory path must be a non-empty string.");
+    }
+    if (value.includes("\0")) {
+      throw new Error("Directory path cannot contain null bytes.");
+    }
+
+    const directoryPath = path.resolve(value);
+    const existing = await stat(directoryPath).catch(() => undefined);
+    if (existing?.isDirectory()) {
+      return { status: "exists", path: directoryPath };
+    }
+    if (existing) {
+      throw new Error(`Path exists but is not a folder: ${directoryPath}`);
+    }
+
+    await dialog.showMessageBox({
+      type: "warning",
+      buttons: ["Recreate folder"],
+      defaultId: 0,
+      title: "Games folder was not found",
+      message: "The games folder was deleted or moved.",
+      detail: `lua-dl will recreate it now:\n\n${directoryPath}`,
+    });
+
+    await mkdir(directoryPath, { recursive: true });
+    return { status: "created", path: directoryPath };
+  });
+
+  ipcMain.handle("shell:open-folder", async (_event, value: unknown) => {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error("Folder path must be a non-empty string.");
+    }
+    if (value.includes("\0")) {
+      throw new Error("Folder path cannot contain null bytes.");
+    }
+
+    await shell.openPath(path.resolve(value));
+  });
+
+  ipcMain.handle(
+    "security:add-defender-exclusion",
+    async (_event, value: unknown) => {
+      if (typeof value !== "string" || value.trim().length === 0) {
+        throw new Error("Defender exclusion path must be a non-empty string.");
+      }
+
+      const explanation = await dialog.showMessageBox({
+        type: "info",
+        buttons: ["Continue", "Cancel"],
+        defaultId: 0,
+        cancelId: 1,
+        title: "Why Windows Defender may ask for confirmation",
+        message: "Before adding this folder to Windows Defender exclusions",
+        detail:
+          "Some game files may look suspicious to Windows Defender because they are new or not officially signed by the original developer.\n\n" +
+          "This is normal — the files are safe. Windows will now ask you to confirm adding the game folder to exclusions so the installation can finish without problems.",
+      });
+
+      if (explanation.response !== 0) {
+        return {
+          status: "skipped",
+          path: value,
+          message: "User canceled Windows Defender explanation.",
+        };
+      }
+
+      const result = await dialog.showMessageBox({
+        type: "question",
+        buttons: ["Add exclusion", "Skip"],
+        defaultId: 0,
+        cancelId: 1,
+        title: "Add Windows Defender exclusion?",
+        message:
+          "Allow lua-dl to add this folder to Windows Defender exclusions?",
+        detail:
+          `${value}\n\nWindows will show an administrator confirmation. ` +
+          "This helps prevent Defender from deleting downloaded game files.",
+      });
+
+      if (result.response !== 0) {
+        return {
+          status: "skipped",
+          path: value,
+          message: "User skipped Windows Defender exclusion.",
+        };
+      }
+
+      return addDefenderExclusion(value);
+    },
+  );
   // Window control handlers
   ipcMain.handle("window:minimize", () => {
     mainWindow?.minimize();

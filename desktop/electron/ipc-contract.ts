@@ -21,6 +21,16 @@ export type DirectoryResult = {
   path?: string;
 };
 
+export type DefenderExclusionResult =
+  | { status: "added"; path: string }
+  | { status: "skipped"; path: string; message: string }
+  | { status: "unsupported"; path: string; message: string }
+  | { status: "failed"; path: string; message: string };
+
+export type EnsureDirectoryResult =
+  | { status: "exists"; path: string }
+  | { status: "created"; path: string };
+
 export type ParsedProgress = {
   percent?: number;
   downloadedMb?: number;
@@ -88,6 +98,9 @@ export type LuaDlApi = {
   write(sessionId: string, input: string): Promise<void>;
   kill(sessionId: string): Promise<void>;
   chooseDirectory(): Promise<DirectoryResult>;
+  addDefenderExclusion(path: string): Promise<DefenderExclusionResult>;
+  ensureDirectory(path: string): Promise<EnsureDirectoryResult>;
+  openFolder(path: string): Promise<void>;
   onEvent(callback: (event: CliEvent) => void): () => void;
   // Update related
   checkForUpdates(): Promise<void>;
@@ -96,9 +109,16 @@ export type LuaDlApi = {
   onUpdateEvent(callback: (event: UpdateEvent) => void): () => void;
 };
 
+export type WindowControlApi = {
+  minimize(): Promise<void>;
+  maximize(): Promise<void>;
+  close(): Promise<void>;
+};
+
 declare global {
   interface Window {
     luaDl?: LuaDlApi;
+    api: WindowControlApi;
   }
 }
 

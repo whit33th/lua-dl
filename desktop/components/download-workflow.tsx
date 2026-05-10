@@ -1,20 +1,14 @@
-"use client";
+﻿"use client";
 
+import { buildDownloadCommand } from "@/lib/cli-commands";
+import { useGamesLibrarySetup } from "@/hooks/use-games-library-setup";
+import { buildGameInstallPath } from "@/lib/game-install-path";
 import { useAppStore } from "@/lib/store";
-import {
-  CheckCircle2,
-  FolderOpen,
-  Globe2,
-  HardDrive,
-  Package,
-  PackageCheck,
-  Play,
-  Square,
-} from "lucide-react";
-import { Skeleton } from "./ui/skeleton";
+import { DepotGrid } from "./depot-grid";
+import { DownloadToolbar } from "./download-toolbar";
 
 type DownloadWorkflowProps = {
-  onDownload(args: string[]): Promise<void>;
+  onDownload(args: string[], gameFolderPath: string): Promise<void>;
   onStop?(): void;
 };
 
@@ -25,39 +19,48 @@ export function DownloadWorkflow({
   const appId = useAppStore((state) => state.appId);
   const mode = useAppStore((state) => state.mode);
   const cli = useAppStore((state) => state.cli);
+  const metadata = useAppStore((state) => state.metadata);
   const selectedDepots = useAppStore((state) => state.selectedDepots);
   const downloadAll = useAppStore((state) => state.downloadAll);
   const settings = useAppStore((state) => state.settings);
   const toggleDepot = useAppStore((state) => state.toggleDepot);
   const setDownloadAll = useAppStore((state) => state.setDownloadAll);
-  const setOutputDir = useAppStore((state) => state.setOutputDir);
+  const { chooseAndPrepareLibrary, isSelectingLibrary } =
+    useGamesLibrarySetup();
 
   const canDownload =
     Boolean(appId) && mode !== "probing" && mode !== "downloading";
 
   async function chooseDirectory() {
-    const result = await window.luaDl?.chooseDirectory();
-    if (!result?.canceled && result?.path) {
-      setOutputDir(result.path);
-    }
+    await chooseAndPrepareLibrary();
   }
 
-  function buildDownloadArgs() {
-    const args = ["download", appId];
-    if (downloadAll) {
-      args.push("--all");
-    } else if (selectedDepots.length > 0) {
-      args.push("--depots", selectedDepots.join(","));
-    } else {
-      args.push("--depots", "0");
-    }
+  async function startDownload() {
+    const gameInstallPath = buildGameInstallPath(
+      settings.outputDir,
+      metadata?.name ?? appId,
+    );
+    const downloadSettings = {
+      ...settings,
+      outputDir: gameInstallPath || settings.outputDir,
+    };
+
     if (settings.outputDir) {
-      args.push("--out", settings.outputDir);
+      await window.luaDl?.ensureDirectory(settings.outputDir);
     }
-    if (settings.verbose) {
-      args.push("-v");
+    if (downloadSettings.outputDir) {
+      await window.luaDl?.ensureDirectory(downloadSettings.outputDir);
     }
-    return args;
+
+    void onDownload(
+      buildDownloadCommand({
+        appId,
+        downloadAll,
+        selectedDepotIds: selectedDepots,
+        settings: downloadSettings,
+      }),
+      downloadSettings.outputDir,
+    );
   }
 
   return (
@@ -65,134 +68,24 @@ export function DownloadWorkflow({
       className="relative h-full flex-1 p-5"
       aria-labelledby="download-title"
     >
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex gap-2">
-          <label
-            className={`border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 transition-[color,background-color,border-color,opacity] hover:bg-black/80 ${downloadAll ? "text-text" : "text-dim opacity-50 hover:opacity-100"}`}
-            title="All optional content"
-          >
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={downloadAll}
-              onChange={(event) => setDownloadAll(event.target.checked)}
-            />
-            {downloadAll ? <PackageCheck size={18} /> : <Package size={18} />}
-          </label>
+      <DownloadToolbar
+        canDownload={canDownload}
+        downloadAll={downloadAll}
+        outputDir={settings.outputDir}
+        isDownloading={mode === "downloading" || isSelectingLibrary}
+        onChooseDirectory={chooseDirectory}
+        onDownloadAllChange={setDownloadAll}
+        onDownload={startDownload}
+        onStop={onStop}
+      />
 
-          <button
-            className="border-line text-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 opacity-80 transition-[opacity,background-color,border-color] hover:bg-black/80 hover:opacity-100"
-            type="button"
-            title={settings.outputDir || "Default folder"}
-            onClick={chooseDirectory}
-          >
-            <FolderOpen size={18} />
-          </button>
-        </div>
-
-        {mode === "downloading" ? (
-          <div className="flex gap-2">
-            <button
-              className="border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
-              type="button"
-              title="Stop"
-              onClick={onStop}
-            >
-              <Square size={16} fill="currentColor" />
-            </button>
-          </div>
-        ) : (
-          <button
-            className="bg-text text-panel-strong inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-bold transition-transform disabled:cursor-not-allowed disabled:opacity-42"
-            type="button"
-            disabled={!canDownload}
-            onClick={() => void onDownload(buildDownloadArgs())}
-          >
-            <Play size={17} aria-hidden="true" />
-            Start
-          </button>
-        )}
-      </div>
-
-      <div
-        className="relative max-h-[calc(100%-4rem)] overflow-y-auto pr-1 transition-opacity"
-        style={{
-          opacity: downloadAll ? 0.4 : 1,
-          pointerEvents: downloadAll ? "none" : "auto",
-        }}
-      >
-        <div
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-          aria-label="Depot selection"
-        >
-          {cli.depots.filter((d) => d.kind !== "core").length === 0 &&
-          mode === "probing"
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="border-line flex flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5"
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <Skeleton className="h-4 w-4 rounded" />
-                    <Skeleton className="h-5 w-5 rounded-full" />
-                  </div>
-                  <div className="flex w-full flex-1 flex-col justify-end">
-                    <div className="flex w-full items-center justify-between">
-                      <Skeleton className="h-3 w-16" />
-                      <Skeleton className="h-2 w-10" />
-                    </div>
-                  </div>
-                </div>
-              ))
-            : cli.depots
-                .filter((depot) => depot.kind !== "core")
-                .map((depot) => (
-                  <label
-                    className="border-line flex cursor-pointer flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5 transition-[background-color,border-color] hover:bg-black/60"
-                    key={depot.id}
-                    data-kind={depot.kind}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <input
-                        type="checkbox"
-                        className="accent-text h-4 w-4 rounded"
-                        checked={
-                          downloadAll || selectedDepots.includes(depot.id)
-                        }
-                        disabled={downloadAll}
-                        onChange={() => toggleDepot(depot.id)}
-                      />
-                      <DepotIcon kind={depot.kind} />
-                    </div>
-
-                    <div className="flex w-full flex-1 flex-col justify-end">
-                      <div className="flex w-full items-center justify-between">
-                        <span className="text-text/90 text-[11px] font-bold tracking-wider uppercase">
-                          {depot.tag ?? depot.kind ?? "depot"}
-                        </span>
-                        <span className="text-dim text-[9px] font-medium">
-                          {depot.size ? depot.size : depot.id}
-                        </span>
-                      </div>
-                    </div>
-                  </label>
-                ))}
-        </div>
-        <div className="sticky bottom-0 left-0 z-10 h-6 w-full bg-linear-to-t from-black to-transparent" />
-      </div>
+      <DepotGrid
+        depots={cli.depots}
+        mode={mode}
+        downloadAll={downloadAll}
+        selectedDepots={selectedDepots}
+        onToggleDepot={toggleDepot}
+      />
     </section>
   );
-}
-
-function DepotIcon({ kind }: { kind?: string }) {
-  if (kind === "core") {
-    return <HardDrive className="depot-icon" size={19} aria-hidden="true" />;
-  }
-  if (kind === "language") {
-    return <Globe2 className="depot-icon" size={19} aria-hidden="true" />;
-  }
-  if (kind === "dlc") {
-    return <Package className="depot-icon" size={19} aria-hidden="true" />;
-  }
-  return <CheckCircle2 className="depot-icon" size={19} aria-hidden="true" />;
 }
