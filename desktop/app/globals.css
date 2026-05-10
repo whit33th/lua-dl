@@ -46,7 +46,6 @@ button {
 }
 
 @keyframes pulse-slow {
-
   0%,
   100% {
     opacity: 0.5;
@@ -62,7 +61,6 @@ button {
 }
 
 @keyframes skeleton-pulse {
-
   0%,
   100% {
     opacity: 0.5;
@@ -201,4 +199,13 @@ button {
   html {
     @apply font-sans;
   }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE и Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }

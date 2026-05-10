@@ -4,8 +4,9 @@ import type { SteamMetadata } from "@/lib/steam-metadata";
 import type { WorkflowMode } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Gamepad2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import ShinyText from "./ui/shiny-text";
+import { useMemo, useState } from "react";
 import { Border } from "./ui/border";
 import { Skeleton } from "./ui/skeleton";
 
@@ -15,41 +16,70 @@ type GameSummaryCardProps = {
 };
 
 export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
+  const [previewImage, setPreviewImage] = useState<string>();
+  const screenshots = useMemo(
+    () => metadata?.screenshots?.slice(0, 8) ?? [],
+    [metadata?.screenshots],
+  );
+  const displayImage = previewImage ?? metadata?.headerImage;
+
   return (
     <div className="border-line group relative h-48 flex-none border backdrop-blur-sm">
       <Border />
       <div className="absolute inset-0 overflow-hidden">
-        {metadata?.headerImage && (
-          <Image
-            src={metadata.headerImage}
-            width={460}
-            height={215}
-            alt=""
-            className={cn(
-              "h-full w-full object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
-              mode === "downloading"
-                ? "animate-pulse-slow grayscale-0"
-                : "grayscale group-hover:grayscale-0",
-            )}
-          />
-        )}
+        <AnimatePresence initial={false}>
+          {displayImage && (
+            <motion.div
+              key={`bg-${displayImage}`}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.14, ease: "easeOut" }}
+            >
+              <Image
+                src={displayImage}
+                fill
+                sizes="100vw"
+                alt=""
+                className={cn(
+                  "object-cover opacity-50 blur-xl transition-[filter,opacity,transform] duration-500 ease-in-out group-hover:opacity-70",
+                  mode === "downloading"
+                    ? "animate-pulse-slow grayscale-0"
+                    : "grayscale group-hover:grayscale-0",
+                )}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div className="relative flex h-full items-center gap-6 p-4">
         <div className="border-line relative aspect-92/43 h-full w-auto flex-none overflow-hidden border bg-black shadow-2xl">
-          {metadata?.headerImage ? (
-            <Image
-              src={metadata.headerImage}
-              width={460}
-              height={215}
-              alt=""
-              className={cn(
-                "object-cover",
-                mode === "downloading" && "animate-pulse-slow",
-              )}
-              loading="eager"
-              priority
-              fetchPriority="high"
-            />
+          {displayImage ? (
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={`main-${displayImage}`}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.14, ease: "easeOut" }}
+              >
+                <Image
+                  src={displayImage}
+                  fill
+                  sizes="460px"
+                  alt=""
+                  className={cn(
+                    "object-cover",
+                    mode === "downloading" && "animate-pulse-slow",
+                  )}
+                  loading="eager"
+                  priority
+                  fetchPriority="high"
+                />
+              </motion.div>
+            </AnimatePresence>
           ) : mode === "probing" ? (
             <Skeleton className="h-full w-full" />
           ) : (
@@ -58,20 +88,100 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
             </div>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <GameSummaryTitle metadata={metadata} mode={mode} />
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+          <GameSummaryDetails
+            metadata={metadata}
+            mode={mode}
+            screenshots={screenshots}
+            onPreview={setPreviewImage}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-function GameSummaryTitle({ metadata, mode }: GameSummaryCardProps) {
+function GameSummaryDetails({
+  metadata,
+  mode,
+  screenshots,
+  onPreview,
+}: GameSummaryCardProps & {
+  screenshots: NonNullable<SteamMetadata["screenshots"]>;
+  onPreview(value?: string): void;
+}) {
   if (metadata) {
+    const tags = [...(metadata.genres ?? []), ...(metadata.categories ?? [])]
+      .map((tag) => tag.description)
+      .filter((tag, index, all) => all.indexOf(tag) === index)
+      .slice(0, 5);
+
     return (
-      <h3 className="text-text m-0 line-clamp-3 text-4xl leading-tight font-bold text-wrap">
-        <ShinyText text={metadata.name} disabled={false} speed={3} />
-      </h3>
+      <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_104px] gap-3">
+        <div className="flex min-h-0 min-w-0 flex-col gap-1">
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-bold tracking-tight">
+              {metadata.name}
+            </h3>
+          </div>
+
+          <div className="mt-2 flex flex-wrap gap-1.5 overflow-hidden">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="max-w-32 truncate bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="text-muted mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold">
+            {metadata.releaseDate ? <span>{metadata.releaseDate}</span> : null}
+            {metadata.metacriticScore ? (
+              <span className="flex flex-none items-center gap-1.5 text-sm leading-none font-black text-yellow-300 tabular-nums">
+                <Image
+                  src="https://www.metacritic.com/favicon.ico"
+                  width={14}
+                  height={14}
+                  alt=""
+                  className="rounded-xs"
+                />
+                {metadata.metacriticScore}
+              </span>
+            ) : null}
+            {metadata.developers?.[0] ? (
+              <span className="truncate">{metadata.developers[0]}</span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="scrollbar-hide min-h-0 overflow-y-auto pr-1">
+          <div className="flex flex-col gap-1">
+            {screenshots.map((screenshot) => (
+              <button
+                key={screenshot.id}
+                type="button"
+                className="border-line overflow-hiddenborder relative h-11 bg-white/2 opacity-80 transition hover:opacity-100"
+                onMouseEnter={() => onPreview(screenshot.full)}
+                onFocus={() => onPreview(screenshot.full)}
+                onMouseLeave={() => onPreview(undefined)}
+                onBlur={() => onPreview(undefined)}
+              >
+                <Image
+                  src={screenshot.thumbnail}
+                  width={120}
+                  height={45}
+                  priority
+                  loading="eager"
+                  alt={`Screenshot ${screenshot.id}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -87,7 +197,7 @@ function GameSummaryTitle({ metadata, mode }: GameSummaryCardProps) {
   return (
     <>
       <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
-        <ShinyText text="Waiting" disabled={false} speed={3} />
+        Waiting
       </h3>
       <div className="mt-1 flex items-center gap-2">
         <span className="border-line text-muted rounded border bg-black/90 px-2 py-0.5 text-xs font-bold uppercase">
@@ -97,4 +207,3 @@ function GameSummaryTitle({ metadata, mode }: GameSummaryCardProps) {
     </>
   );
 }
-

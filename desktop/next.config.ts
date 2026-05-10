@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   assetPrefix: "./",
   experimental: {
     turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
     optimizeCss: true,
   },
   images: {
