@@ -70,6 +70,7 @@ export function AppShell() {
 
       clearRun();
       setAppId(parsed);
+      setMetadata(undefined);
       setMode("probing");
 
       startTransition(() => {

@@ -34,14 +34,47 @@ export type SteamMovie = {
   mp4?: string;
 };
 
+const metadataCache = new Map<
+  string,
+  { expiresAt: number; metadata: SteamMetadata }
+>();
+const metadataRequests = new Map<string, Promise<SteamMetadata>>();
+const metadataCacheTtlMs = 12 * 60 * 60 * 1000; // 12 hours
+
 export async function fetchSteamMetadata(
+  appId: string,
+): Promise<SteamMetadata> {
+  const cached = metadataCache.get(appId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.metadata;
+  }
+
+  const pending = metadataRequests.get(appId);
+  if (pending) {
+    return pending;
+  }
+
+  const request = fetchSteamMetadataUncached(appId)
+    .then((metadata) => {
+      metadataCache.set(appId, {
+        expiresAt: Date.now() + metadataCacheTtlMs,
+        metadata,
+      });
+      return metadata;
+    })
+    .finally(() => {
+      metadataRequests.delete(appId);
+    });
+
+  metadataRequests.set(appId, request);
+  return request;
+}
+
+async function fetchSteamMetadataUncached(
   appId: string,
 ): Promise<SteamMetadata> {
   const response = await fetch(
     `https://store.steampowered.com/api/appdetails?appids=${appId}&filters=basic,categories,genres,screenshots,movies,metacritic,recommendations,release_date&l=english&cc=US`,
-    {
-      cache: "no-store",
-    },
   );
   if (!response.ok) {
     throw new Error(
@@ -92,7 +125,8 @@ const searchCache = new Map<
   string,
   { expiresAt: number; results: SteamSearchResult[] }
 >();
-const searchCacheTtlMs = 5 * 60 * 1000;
+const searchRequests = new Map<string, Promise<SteamSearchResult[]>>();
+const searchCacheTtlMs = 60 * 60 * 1000; // 24 hours
 
 export async function searchSteamGames(
   term: string,
@@ -105,6 +139,22 @@ export async function searchSteamGames(
     return cached.results;
   }
 
+  const pending = searchRequests.get(query);
+  if (pending) {
+    return pending;
+  }
+
+  const request = searchSteamGamesUncached(query).finally(() => {
+    searchRequests.delete(query);
+  });
+
+  searchRequests.set(query, request);
+  return request;
+}
+
+async function searchSteamGamesUncached(
+  query: string,
+): Promise<SteamSearchResult[]> {
   const response = await fetch(
     `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(
       query,
@@ -161,7 +211,16 @@ function normalizeMovies(value: unknown): SteamMovie[] | undefined {
       name: String(item.name),
       thumbnail:
         typeof item.thumbnail === "string" ? item.thumbnail : undefined,
-      mp4: typeof item.mp4?.max === "string" ? item.mp4.max : item.mp4?.["480"],
+      mp4:
+        typeof item.mp4?.max === "string"
+          ? item.mp4.max
+          : typeof item.mp4?.["480"] === "string"
+            ? item.mp4["480"]
+            : typeof item.hls_h264 === "string"
+              ? item.hls_h264
+              : typeof item.dash_h264 === "string"
+                ? item.dash_h264
+                : undefined,
     }));
 }
 
