@@ -44,7 +44,9 @@ export function SteamSearchResults({
             onClick={() => onSelect(result)}
             className={cn(
               "flex w-full items-center gap-4 rounded-xs p-2 text-left transition-colors",
-              selectedIndex === index ? "bg-white/20 shadow-lg" : "hover:bg-white/10",
+              selectedIndex === index
+                ? "bg-white/20 shadow-lg"
+                : "hover:bg-white/10",
             )}
           >
             <div className="relative aspect-8/3 flex-none overflow-hidden border border-white/10 bg-black/40">

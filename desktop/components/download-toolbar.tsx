@@ -67,7 +67,7 @@ export function DownloadToolbar({
           disabled={!canDownload}
           onClick={onDownload}
         >
-          <Play size={17} aria-hidden="true" />
+          <Play size={16} aria-hidden="true" className="text-black fill-black" />
           Start
         </button>
       )}

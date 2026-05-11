@@ -1,7 +1,14 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { Activity, CheckCircle2, CircleAlert } from "lucide-react";
+import {
+  Activity,
+  CheckCircle2,
+  CircleAlert,
+  Download,
+  FileText,
+  Gauge,
+} from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 
 export function ProgressPanel() {
@@ -66,49 +73,73 @@ export function ProgressPanel() {
         </div>
 
         <div className="mt-2 grid grid-cols-1 gap-2">
-          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
-            <span className="text-dim text-[10px] font-bold uppercase">
-              Speed
-            </span>
-            {mode === "probing" ? (
-              <Skeleton className="h-4 w-16" />
-            ) : (
-              <span className="text-text text-sm font-bold">
-                {progress?.mbps
-                  ? `${progress.mbps.toFixed(1)} MB/s`
-                  : "0.0 MB/s"}
+          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+            <Gauge
+              size={20}
+              className="text-dim flex-none"
+              aria-hidden="true"
+            />
+            <div className="bg-line/50 h-5 w-px flex-none" />
+            <div className="flex min-w-0 flex-1 items-center justify-between">
+              <span className="text-dim text-[10px] font-bold tracking-wider uppercase">
+                Speed
               </span>
-            )}
+              {mode === "probing" ? (
+                <Skeleton className="h-5.5 w-16" />
+              ) : (
+                <span className="text-text text-base font-bold">
+                  {progress?.mbps
+                    ? `${progress.mbps.toFixed(1)} MB/s`
+                    : "0.0 MB/s"}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
-            <span className="text-dim text-[10px] font-bold uppercase">
-              Files
-            </span>
-            {mode === "probing" ? (
-              <Skeleton className="h-4 w-12" />
-            ) : (
-              <span className="text-text text-sm font-bold">
-                {progress?.filesTotal
-                  ? `${progress.filesDone} / ${progress.filesTotal}`
-                  : "0 / 0"}
+          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+            <FileText
+              size={20}
+              className="text-dim flex-none"
+              aria-hidden="true"
+            />
+            <div className="bg-line/50 h-5 w-px flex-none" />
+            <div className="flex min-w-0 flex-1 items-center justify-between">
+              <span className="text-dim text-[10px] font-bold tracking-wider uppercase">
+                Files
               </span>
-            )}
+              {mode === "probing" ? (
+                <Skeleton className="h-5.5 w-12" />
+              ) : (
+                <span className="text-text text-base font-bold">
+                  {progress?.filesTotal
+                    ? `${progress.filesDone} / ${progress.filesTotal}`
+                    : "0 / 0"}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="border-line flex items-center justify-between rounded-xl border bg-black/20 p-3 transition-colors hover:bg-black/30">
-            <span className="text-dim text-[10px] font-bold uppercase">
-              Downloaded
-            </span>
-            {mode === "probing" ? (
-              <Skeleton className="h-4 w-20" />
-            ) : (
-              <span className="text-text text-sm font-bold">
-                {progress?.totalMb
-                  ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
-                  : "0 MB"}
+          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+            <Download
+              size={20}
+              className="text-dim flex-none"
+              aria-hidden="true"
+            />
+            <div className="bg-line/50 h-5.5 w-px flex-none" />
+            <div className="flex min-w-0 flex-1 items-center justify-between">
+              <span className="text-dim text-[10px] font-bold tracking-wider uppercase">
+                Downloaded
               </span>
-            )}
+              {mode === "probing" ? (
+                <Skeleton className="h-5 w-20" />
+              ) : (
+                <span className="text-text text-base font-bold">
+                  {progress?.totalMb
+                    ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
+                    : "0 MB"}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

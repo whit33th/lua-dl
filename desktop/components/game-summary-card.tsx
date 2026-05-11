@@ -88,26 +88,29 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
       <Border />
       <div className="absolute inset-0 overflow-x-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-        {backdropSrc && (
-          <motion.div
-            key={`bg-${backdropSrc}`}
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.34, ease: mediaEase }}
-          >
-            <Image
-              src={backdropSrc}
-              width={460}
-              height={215}
-              alt=""
-              className={cn(
-                "h-full w-full object-cover blur-lg transition-[filter] duration-300 brightness-85 group-hover:brightness-80",
-                mode === "downloading" ? "animate-pulse-slow" : "",
-              )}
-            />
-          </motion.div>
-        )}
+        <AnimatePresence initial={false}>
+          {backdropSrc && (
+            <motion.div
+              key={`bg-${backdropSrc}`}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.34, ease: mediaEase }}
+            >
+              <Image
+                src={backdropSrc}
+                width={460}
+                height={215}
+                alt=""
+                className={cn(
+                  "h-full w-full object-cover blur-lg brightness-85 transition-[filter] duration-300 group-hover:brightness-80",
+                  mode === "downloading" ? "animate-pulse-slow" : "",
+                )}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <motion.div
@@ -220,7 +223,7 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
         transition={{ duration: 0.42, ease: mediaEase }}
       >
         <div className="flex min-w-0 items-start justify-between gap-3">
-          <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-bold tracking-tight">
+          <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-bold tracking-tight 2xl:text-[2.1rem]">
             {metadata.name}
           </h3>
         </div>
@@ -229,8 +232,8 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
           {tags.map((tag) => (
             <motion.span
               key={tag}
-              className="max-w-32 truncate bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)]"
-              whileHover={{ y: -1, backgroundColor: "rgba(255,255,255,0.16)" }}
+              className="bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)] 2xl:text-xs"
+              
               transition={snapSpring}
             >
               {tag}
@@ -271,7 +274,7 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
         </div>
 
         {metadata.shortDescription ? (
-          <p className="text-muted mt-3 line-clamp-6 text-xs leading-relaxed text-shadow-2xs">
+          <p className="text-muted mt-3 line-clamp-6 text-xs leading-relaxed text-shadow-2xs 2xl:text-sm">
             {metadata.shortDescription}
           </p>
         ) : null}
@@ -376,7 +379,7 @@ function ScreenshotStrip({
                 isSelected && "border-white/20 opacity-100",
               )}
               variants={{
-                hidden: { opacity: 0, y: 8},
+                hidden: { opacity: 0, y: 8 },
                 show: {
                   opacity: 0.8,
                   y: 0,
