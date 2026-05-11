@@ -1,6 +1,7 @@
 import WindowFrame from "@/components/window-frame/window-frame";
 import type { Metadata } from "next";
 import { Arimo, Geist } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <Toaster richColors={false} />
       </body>
     </html>
   );

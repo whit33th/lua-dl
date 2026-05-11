@@ -6,7 +6,6 @@ import { buildProbeCommand } from "@/lib/cli-commands";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { parseSteamAppId } from "@/lib/steam-app-id";
 import { useAppStore } from "@/lib/store";
-import { AlertCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { AppIdEntry } from "./app-id-entry";
@@ -30,7 +29,6 @@ export function AppShell() {
   const metadata = useAppStore((state) => state.metadata);
   const mode = useAppStore((state) => state.mode);
   const settings = useAppStore((state) => state.settings);
-  const cli = useAppStore((state) => state.cli);
   const setAppId = useAppStore((state) => state.setAppId);
   const setMetadata = useAppStore((state) => state.setMetadata);
   const setMode = useAppStore((state) => state.setMode);
@@ -128,7 +126,7 @@ export function AppShell() {
             />
           </div>
 
-          <section className="z-10 flex h-full flex-1 gap-4 overflow-hidden px-6 pt-1 pb-6">
+          <section className="z-10 flex h-full flex-1 gap-4 overflow-hidden px-6 py-1">
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               <GameSummaryCard metadata={metadata} mode={mode} />
 
@@ -154,23 +152,6 @@ export function AppShell() {
                 <Border />
                 <ProgressPanel />
               </div>
-
-              {cli.lastError ? (
-                <motion.div
-                  className="flex gap-2.5 border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-bold text-red-500"
-                  role="alert"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.28, ease: cinematicEase }}
-                >
-                  <AlertCircle
-                    size={16}
-                    aria-hidden="true"
-                    className="flex-none"
-                  />
-                  <span>{cli.lastError}</span>
-                </motion.div>
-              ) : null}
             </aside>
           </section>
         </div>

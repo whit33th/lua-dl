@@ -15,7 +15,8 @@ export default function WindowFrame() {
     >
       <div className="ml-2 flex items-center gap-2">
         {/* <Image src="/imgs/logo.png" alt="Logo" width={18} height={18} /> */}
-        <div className="size-4 bg-black"></div>
+        {/* <div className="size-4 bg-black"></div> */}
+        <video src="videos/square.mp4" autoPlay loop muted preload="auto" playsInline className="size-4 grayscale brightness-110" />
       </div>
 
       <div
