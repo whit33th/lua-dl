@@ -446,7 +446,7 @@ void main() {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full pointer-events-none z-[10] ${className}`.trim()}
+      className={`w-full h-full inset-0 pointer-events-none z-10 ${className}`.trim()}
     />
   );
 };

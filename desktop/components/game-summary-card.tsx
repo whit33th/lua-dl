@@ -97,7 +97,7 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
         mouseInfluence={0.1}
         noiseAmount={1}
         distortion={0}
-        className="custom-rays absolute inset-0 opacity-80"
+        className="custom-rays w-full h-full absolute inset-0 opacity-80"
         pulsating={false}
         fadeDistance={1}
         saturation={1}
