@@ -9,7 +9,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Border } from "./ui/border";
 import { Skeleton } from "./ui/skeleton";
-import LightRays from "./LightRays";
+import LightRays from "./ui/light-rays";
 
 type SteamMovieWithMp4 = NonNullable<SteamMetadata["movies"]>[number] & {
   mp4: string;
