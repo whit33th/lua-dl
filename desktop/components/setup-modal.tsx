@@ -8,6 +8,7 @@ import { useAppStore } from "@/lib/store";
 
 export function SetupModal() {
   const hasCompletedSetup = useAppStore((state) => state.hasCompletedSetup);
+  const hasHydrated = useAppStore((state) => state.hasHydrated);
   const outputDir = useAppStore((state) => state.settings.outputDir);
   const [selectedParentFolder, setSelectedParentFolder] = useState("");
   const [error, setError] = useState("");
@@ -15,7 +16,7 @@ export function SetupModal() {
     useGamesLibrarySetup();
   const libraryPath = outputDir;
 
-  if (hasCompletedSetup) {
+  if (!hasHydrated || hasCompletedSetup) {
     return null;
   }
 

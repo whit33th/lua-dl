@@ -35,6 +35,7 @@ type AppState = {
   downloadAll: boolean;
   settings: DesktopSettings;
   hasCompletedSetup: boolean;
+  hasHydrated: boolean;
   updateState: UpdateEvent;
   isUpdateModalOpen: boolean;
   setAppId(appId: string): void;
@@ -53,6 +54,7 @@ type AppState = {
   setDensity(value: DesktopSettings["density"]): void;
   setUpdateState(event: UpdateEvent): void;
   setUpdateModalOpen(open: boolean): void;
+  setHasHydrated(value: boolean): void;
 };
 
 const defaultCliState: ParsedCliState = {
@@ -77,6 +79,7 @@ export const useAppStore = create<AppState>()(
       updateState: { type: "not-available" },
       isUpdateModalOpen: false,
       hasCompletedSetup: false,
+      hasHydrated: false,
       setAppId: (appId) => set({ appId }),
       setMetadata: (metadata) => set({ metadata }),
       setMode: (mode) => set({ mode }),
@@ -141,6 +144,7 @@ export const useAppStore = create<AppState>()(
         })),
       setUpdateState: (updateState) => set({ updateState }),
       setUpdateModalOpen: (open) => set({ isUpdateModalOpen: open }),
+      setHasHydrated: (value: boolean) => set({ hasHydrated: value }),
     }),
     {
       name: "lua-dl-desktop-settings",
@@ -148,6 +152,13 @@ export const useAppStore = create<AppState>()(
         settings: state.settings,
         hasCompletedSetup: state.hasCompletedSetup,
       }),
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (!error) {
+            state?.setHasHydrated(true);
+          }
+        };
+      },
     },
   ),
 );

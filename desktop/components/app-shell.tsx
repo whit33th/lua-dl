@@ -109,68 +109,72 @@ export function AppShell() {
 
   const isIdle = mode === "idle" && !appId;
 
-  if (isIdle) {
-    return (
-      <SplashScreen
-        isPending={isPending}
-        isSettingsOpen={isSettingsOpen}
-        onInspect={inspectApp}
-        onCloseSettings={() => setIsSettingsOpen(false)}
-      />
-    );
-  }
-
   return (
-    <div className="relative z-0 flex h-full w-full flex-col pt-8">
-      <div className="z-20 mx-auto w-full max-w-3xl px-6 pb-6">
-        <AppIdEntry
-          onSubmit={inspectApp}
-          isLoading={mode === "probing" || isPending}
-          disabled={mode === "downloading"}
+    <>
+      {isIdle ? (
+        <SplashScreen
+          isPending={isPending}
+          isSettingsOpen={isSettingsOpen}
+          onInspect={inspectApp}
+          onCloseSettings={() => setIsSettingsOpen(false)}
         />
-      </div>
-
-      <section className="z-10 flex h-full flex-1 gap-4 overflow-hidden px-6 pt-1 pb-6">
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <GameSummaryCard metadata={metadata} mode={mode} />
-
-          <motion.div
-            className="border-line relative min-h-0 flex-1 border"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: cinematicEase }}
-          >
-            <Border />
-            <DownloadWorkflow
-              onDownload={startDownload}
-              onStop={stopActiveSession}
+      ) : (
+        <div className="relative z-0 flex h-full w-full flex-col pt-8">
+          <div className="z-20 mx-auto w-full max-w-3xl px-6 pb-6">
+            <AppIdEntry
+              onSubmit={inspectApp}
+              isLoading={mode === "probing" || isPending}
+              disabled={mode === "downloading"}
             />
-          </motion.div>
-        </div>
-
-        <aside
-          className="relative flex w-80 flex-none flex-col gap-4"
-          aria-label="Progress and Status"
-        >
-          <div className="border-line relative flex flex-1 flex-col border p-5">
-            <Border />
-            <ProgressPanel />
           </div>
 
-          {cli.lastError ? (
-            <motion.div
-              className="flex gap-2.5 border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-bold text-red-500"
-              role="alert"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.28, ease: cinematicEase }}
+          <section className="z-10 flex h-full flex-1 gap-4 overflow-hidden px-6 pt-1 pb-6">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
+              <GameSummaryCard metadata={metadata} mode={mode} />
+
+              <motion.div
+                className="border-line relative min-h-0 flex-1 border"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: cinematicEase }}
+              >
+                <Border />
+                <DownloadWorkflow
+                  onDownload={startDownload}
+                  onStop={stopActiveSession}
+                />
+              </motion.div>
+            </div>
+
+            <aside
+              className="relative flex w-80 flex-none flex-col gap-4"
+              aria-label="Progress and Status"
             >
-              <AlertCircle size={16} aria-hidden="true" className="flex-none" />
-              <span>{cli.lastError}</span>
-            </motion.div>
-          ) : null}
-        </aside>
-      </section>
+              <div className="border-line relative flex flex-1 flex-col border p-5">
+                <Border />
+                <ProgressPanel />
+              </div>
+
+              {cli.lastError ? (
+                <motion.div
+                  className="flex gap-2.5 border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-bold text-red-500"
+                  role="alert"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: cinematicEase }}
+                >
+                  <AlertCircle
+                    size={16}
+                    aria-hidden="true"
+                    className="flex-none"
+                  />
+                  <span>{cli.lastError}</span>
+                </motion.div>
+              ) : null}
+            </aside>
+          </section>
+        </div>
+      )}
 
       <CliFeed />
       <PromptModal />
@@ -180,6 +184,6 @@ export function AppShell() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </div>
+    </>
   );
 }
