@@ -7,6 +7,7 @@ import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { parseSteamAppId } from "@/lib/steam-app-id";
 import { useAppStore } from "@/lib/store";
 import { AlertCircle } from "lucide-react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { AppIdEntry } from "./app-id-entry";
 import { CliFeed } from "./cli-feed";
@@ -19,6 +20,8 @@ import { SetupModal } from "./setup-modal";
 import { SplashScreen } from "./splash-screen";
 import { Border } from "./ui/border";
 import { UpdateModal } from "./update-modal";
+
+const cinematicEase = [0.16, 1, 0.3, 1] as const;
 
 export function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -119,7 +122,6 @@ export function AppShell() {
 
   return (
     <div className="relative z-0 flex h-full w-full flex-col pt-8">
-      {/* <SplashCursor /> */}
       <div className="z-20 mx-auto w-full max-w-3xl px-6 pb-6">
         <AppIdEntry
           onSubmit={inspectApp}
@@ -132,13 +134,18 @@ export function AppShell() {
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <GameSummaryCard metadata={metadata} mode={mode} />
 
-          <div className="border-line relative min-h-0 flex-1 border">
+          <motion.div
+            className="border-line relative min-h-0 flex-1 border"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: cinematicEase }}
+          >
             <Border />
             <DownloadWorkflow
               onDownload={startDownload}
               onStop={stopActiveSession}
             />
-          </div>
+          </motion.div>
         </div>
 
         <aside
@@ -147,18 +154,20 @@ export function AppShell() {
         >
           <div className="border-line relative flex flex-1 flex-col border p-5">
             <Border />
-
             <ProgressPanel />
           </div>
 
           {cli.lastError ? (
-            <div
+            <motion.div
               className="flex gap-2.5 border border-red-500/20 bg-red-500/10 p-3.5 text-xs font-bold text-red-500"
               role="alert"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: cinematicEase }}
             >
               <AlertCircle size={16} aria-hidden="true" className="flex-none" />
               <span>{cli.lastError}</span>
-            </div>
+            </motion.div>
           ) : null}
         </aside>
       </section>

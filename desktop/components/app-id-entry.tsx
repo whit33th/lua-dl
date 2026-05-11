@@ -115,6 +115,7 @@ export function AppIdEntry({
           }}
           onKeyDown={handleKeyDown}
           autoComplete="off"
+          autoFocus={isSplash}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "app-id-error" : undefined}
           className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-4 text-2xl font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"

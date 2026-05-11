@@ -2,6 +2,8 @@
 
 import type { DepotOption } from "@/lib/cli-types";
 import type { WorkflowMode } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 import { DepotIcon } from "./depot-icon";
 import { Skeleton } from "./ui/skeleton";
 
@@ -11,6 +13,14 @@ type DepotGridProps = {
   downloadAll: boolean;
   selectedDepots: string[];
   onToggleDepot(depotId: string): void;
+};
+
+const cardEase = [0.16, 1, 0.3, 1] as const;
+const cardSpring = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 34,
+  mass: 0.7,
 };
 
 export function DepotGrid({
@@ -25,18 +35,29 @@ export function DepotGrid({
 
   return (
     <div
-      className="relative max-h-[calc(100%-4rem)] overflow-y-auto pr-1 transition-opacity"
+      className="relative max-h-[calc(100%-4rem)] overflow-y-auto pr-1"
       style={{
         opacity: downloadAll ? 0.4 : 1,
         pointerEvents: downloadAll ? "none" : "auto",
       }}
     >
-      <div
+      <motion.div
         className="grid grid-cols-2 gap-2 sm:grid-cols-3"
         aria-label="Depot selection"
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: {},
+          show: {
+            transition: {
+              staggerChildren: 0.04,
+              delayChildren: isLoading ? 0 : 0.08,
+            },
+          },
+        }}
       >
         {isLoading
-          ? Array.from({ length: 6 }).map((_, index) => (
+          ? Array.from({ length: 12 }).map((_, index) => (
               <DepotCardSkeleton key={index} />
             ))
           : optionalDepots.map((depot) => (
@@ -48,7 +69,7 @@ export function DepotGrid({
                 onToggle={() => onToggleDepot(depot.id)}
               />
             ))}
-      </div>
+      </motion.div>
       <div className="sticky bottom-0 left-0 z-10 h-6 w-full bg-linear-to-t from-black to-transparent" />
     </div>
   );
@@ -66,9 +87,21 @@ function DepotCard({
   onToggle(): void;
 }) {
   return (
-    <label
-      className="border-line flex cursor-pointer flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5 transition-[background-color,border-color] hover:bg-black/60"
+    <motion.label
+      className={cn(
+        "border-line/50 flex cursor-pointer flex-col items-start gap-2 border bg-black/40 p-2.5 hover:bg-black/60",
+        (isSelected || downloadAll) && "border-white/10",
+      )}
       data-kind={depot.kind}
+      variants={{
+        hidden: { opacity: 0, y: 12 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.42, ease: cardEase },
+        },
+      }}
+      transition={cardSpring}
     >
       <div className="flex w-full items-center justify-between">
         <input
@@ -91,13 +124,23 @@ function DepotCard({
           </span>
         </div>
       </div>
-    </label>
+    </motion.label>
   );
 }
 
 function DepotCardSkeleton() {
   return (
-    <div className="border-line flex flex-col items-start gap-2 rounded-xl border bg-black/40 p-2.5">
+    <motion.div
+      className="border-line flex flex-col items-start gap-2 border bg-black/40 p-2.5"
+      variants={{
+        hidden: { opacity: 0, y: 10 },  
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.38, ease: cardEase },
+        },
+      }}
+    >
       <div className="flex w-full items-center justify-between">
         <Skeleton className="h-4 w-4 rounded" />
         <Skeleton className="h-5 w-5 rounded-full" />
@@ -108,6 +151,6 @@ function DepotCardSkeleton() {
           <Skeleton className="h-2 w-10" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -3,7 +3,7 @@
 import type { SteamMetadata } from "@/lib/steam-metadata";
 import type { WorkflowMode } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Calendar, CalendarDays, Gamepad2 } from "lucide-react";
+import { CalendarDays, Gamepad2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -25,6 +25,14 @@ type GameMedia = {
   thumbnail?: string;
   src: string;
   label: string;
+};
+
+const mediaEase = [0.16, 1, 0.3, 1] as const;
+const snapSpring = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 36,
+  mass: 0.7,
 };
 
 export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
@@ -71,75 +79,97 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
   }, [metadata?.appId]);
 
   return (
-    <div className="border-line group relative flex-none border backdrop-blur-sm">
+    <motion.div
+      className="border-line group relative flex-none border backdrop-blur-sm"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.48, ease: mediaEase }}
+    >
       <Border />
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-x-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-        <AnimatePresence initial={false}>
-          {backdropSrc && (
-            <motion.div
-              key={`bg-${backdropSrc}`}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.14, ease: "easeOut" }}
-            >
-              <Image
-                src={backdropSrc}
-                width={460}
-                height={215}
-                alt=""
-                className={cn(
-                  "h-full w-full object-cover blur-lg brightness-90 transition-[filter,opacity] duration-500 ease-in-out group-hover:opacity-70",
-                  mode === "downloading" ? "animate-pulse-slow" : "",
-                )}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {backdropSrc && (
+          <motion.div
+            key={`bg-${backdropSrc}`}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.34, ease: mediaEase }}
+          >
+            <Image
+              src={backdropSrc}
+              width={460}
+              height={215}
+              alt=""
+              className={cn(
+                "h-full w-full object-cover blur-lg transition-[filter] duration-300 brightness-85 group-hover:brightness-80",
+                mode === "downloading" ? "animate-pulse-slow" : "",
+              )}
+            />
+          </motion.div>
+        )}
       </div>
 
-      <div className="relative flex gap-5 p-5">
-        <div className="flex w-[460px] flex-none flex-col gap-2">
+      <motion.div
+        className="relative flex gap-5 p-5"
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: {},
+          show: {
+            transition: {
+              staggerChildren: 0.065,
+              delayChildren: 0.06,
+            },
+          },
+        }}
+      >
+        <motion.div
+          className="flex w-[460px] flex-none flex-col gap-2"
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.42, ease: mediaEase },
+            },
+          }}
+        >
           <div className="border-line relative aspect-92/43 w-full overflow-hidden border bg-black shadow-2xl">
             {activeSrc ? (
-              <AnimatePresence initial={false}>
-                <motion.div
-                  key={`main-${effectiveMedia?.id ?? activeSrc}`}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.14, ease: "easeOut" }}
-                >
-                  {effectiveMedia?.kind === "movie" ? (
-                    <video
-                      src={effectiveMedia.src}
-                      poster={effectiveMedia.thumbnail}
-                      className="h-full w-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
-                  ) : (
-                    <Image
-                      src={activeSrc}
-                      width={460}
-                      height={215}
-                      alt=""
-                      className={cn(
-                        "object-cover",
-                        mode === "downloading" && "animate-pulse-slow",
-                      )}
-                      loading="eager"
-                      priority
-                      fetchPriority="high"
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
+              <motion.div
+                key={`main-${effectiveMedia?.id ?? activeSrc}`}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.24, ease: mediaEase }}
+              >
+                {effectiveMedia?.kind === "movie" ? (
+                  <video
+                    src={effectiveMedia.src}
+                    poster={effectiveMedia.thumbnail}
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : (
+                  <Image
+                    src={activeSrc}
+                    width={460}
+                    height={215}
+                    alt=""
+                    className={cn(
+                      "object-cover",
+                      mode === "downloading" && "animate-pulse-slow",
+                    )}
+                    loading="eager"
+                    priority
+                    fetchPriority="high"
+                  />
+                )}
+              </motion.div>
             ) : mode === "probing" ? (
               <Skeleton className="h-full w-full" />
             ) : (
@@ -155,13 +185,23 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
             onPreview={setActiveMedia}
             onSelect={setSelectedMedia}
           />
-        </div>
+        </motion.div>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-start pt-3">
+        <motion.div
+          className="flex min-w-0 flex-1 flex-col justify-start pt-3"
+          variants={{
+            hidden: { opacity: 0, x: 12 },
+            show: {
+              opacity: 1,
+              x: 0,
+              transition: { duration: 0.44, ease: mediaEase },
+            },
+          }}
+        >
           <GameSummaryDetails metadata={metadata} mode={mode} />
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -173,7 +213,12 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
       .slice(0, 5);
 
     return (
-      <div className="flex flex-col gap-1">
+      <motion.div
+        className="flex flex-col gap-1"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.42, ease: mediaEase }}
+      >
         <div className="flex min-w-0 items-start justify-between gap-3">
           <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-bold tracking-tight">
             {metadata.name}
@@ -182,12 +227,14 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
 
         <div className="mt-2 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <span
+            <motion.span
               key={tag}
               className="max-w-32 truncate bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)]"
+              whileHover={{ y: -1, backgroundColor: "rgba(255,255,255,0.16)" }}
+              transition={snapSpring}
             >
               {tag}
-            </span>
+            </motion.span>
           ))}
         </div>
 
@@ -224,11 +271,11 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
         </div>
 
         {metadata.shortDescription ? (
-          <p className="text-muted mt-3 line-clamp-3 text-xs leading-relaxed text-shadow-2xs">
+          <p className="text-muted mt-3 line-clamp-6 text-xs leading-relaxed text-shadow-2xs">
             {metadata.shortDescription}
           </p>
         ) : null}
-      </div>
+      </motion.div>
     );
   }
 
@@ -287,7 +334,7 @@ function ScreenshotStrip({
       <button
         type="button"
         onClick={() => scrollBy(-120)}
-        className="absolute top-0 bottom-0 left-0 z-10 flex cursor-pointer items-center border-none bg-black/0 px-1 text-[11px] font-bold text-white/0 transition-all duration-200 group-hover/strip:bg-black/40 group-hover/strip:text-white/60 hover:bg-black/60! hover:text-white!"
+        className="absolute top-0 bottom-0 left-0 z-10 flex cursor-pointer items-center border-none bg-black/0 px-1 text-[11px] font-bold text-white/0 group-hover/strip:bg-black/40 group-hover/strip:text-white/60 hover:bg-black/60! hover:text-white!"
         aria-label="Scroll left"
       >
         ‹
@@ -296,27 +343,50 @@ function ScreenshotStrip({
       <button
         type="button"
         onClick={() => scrollBy(120)}
-        className="absolute top-0 right-0 bottom-0 z-10 flex cursor-pointer items-center border-none bg-black/0 px-1 text-[11px] font-bold text-white/0 transition-all duration-200 group-hover/strip:bg-black/40 group-hover/strip:text-white/60 hover:bg-black/60! hover:text-white!"
+        className="absolute top-0 right-0 bottom-0 z-10 flex cursor-pointer items-center border-none bg-black/0 px-1 text-[11px] font-bold text-white/0 group-hover/strip:bg-black/40 group-hover/strip:text-white/60 hover:bg-black/60! hover:text-white!"
         aria-label="Scroll right"
       >
         ›
       </button>
 
-      <div
+      <motion.div
         ref={scrollRef}
         onWheel={onWheel}
         className="scrollbar-hide flex gap-1.5 overflow-x-auto scroll-smooth pr-1"
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: {},
+          show: {
+            transition: {
+              staggerChildren: 0.035,
+              delayChildren: 0.12,
+            },
+          },
+        }}
       >
         {items.map((item) => {
           const isSelected = item.id === selectedId;
           return (
-            <button
+            <motion.button
               key={item.id}
               type="button"
               className={cn(
-                "border-line relative h-12 w-20 flex-none overflow-hidden border bg-white/5 opacity-80 transition hover:opacity-100",
+                "border-line relative h-12 w-20 flex-none overflow-x-hidden border bg-white/5 opacity-80",
                 isSelected && "border-white/20 opacity-100",
               )}
+              variants={{
+                hidden: { opacity: 0, y: 8},
+                show: {
+                  opacity: 0.8,
+                  y: 0,
+                  transition: { duration: 0.36, ease: mediaEase },
+                },
+              }}
+              animate={isSelected ? { opacity: 1, y: -1 } : undefined}
+              whileHover={{ opacity: 1, y: -2, scale: 1.025 }}
+              whileTap={{ scale: 0.985 }}
+              transition={snapSpring}
               onMouseEnter={() => onPreview(item)}
               onFocus={() => onPreview(item)}
               onMouseLeave={() => onPreview(undefined)}
@@ -337,10 +407,10 @@ function ScreenshotStrip({
                   ▶
                 </span>
               ) : null}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
