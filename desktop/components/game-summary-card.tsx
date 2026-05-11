@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Border } from "./ui/border";
 import { Skeleton } from "./ui/skeleton";
+import LightRays from "./LightRays";
 
 type SteamMovieWithMp4 = NonNullable<SteamMetadata["movies"]>[number] & {
   mp4: string;
@@ -86,6 +87,21 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
       transition={{ duration: 0.48, ease: mediaEase }}
     >
       <Border />
+      <LightRays
+        raysOrigin="left"
+        raysColor="#ffffff"
+        raysSpeed={1}
+        lightSpread={1}
+        rayLength={4}
+        followMouse={true}
+        mouseInfluence={0.1}
+        noiseAmount={1}
+        distortion={0}
+        className="custom-rays absolute inset-0 opacity-80"
+        pulsating={false}
+        fadeDistance={1}
+        saturation={1}
+      />
       <div className="absolute inset-0 overflow-x-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
         <AnimatePresence initial={false}>
@@ -233,7 +249,6 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
             <motion.span
               key={tag}
               className="bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)] 2xl:text-xs"
-              
               transition={snapSpring}
             >
               {tag}

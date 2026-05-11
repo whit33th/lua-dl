@@ -21,11 +21,11 @@ export function ProgressPanel() {
   );
   const statusIcon =
     mode === "failed" ? (
-      <CircleAlert size={19} aria-hidden="true" />
+      <CircleAlert size={16} aria-hidden="true" />
     ) : mode === "finished" ? (
-      <CheckCircle2 size={19} aria-hidden="true" />
+      <CheckCircle2 size={16} aria-hidden="true" />
     ) : (
-      <Activity size={19} aria-hidden="true" />
+      <Activity size={16} aria-hidden="true" />
     );
 
   return (
@@ -55,7 +55,7 @@ export function ProgressPanel() {
               Progress
             </span>
             <span className="text-text text-sm font-bold">
-              {percent.toFixed(1)}%
+              {percent.toFixed(0)}%
             </span>
           </div>
           <div
@@ -73,9 +73,9 @@ export function ProgressPanel() {
         </div>
 
         <div className="mt-2 grid grid-cols-1 gap-2">
-          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+          <div className="border-line flex items-center gap-2 border bg-black/20 p-3">
             <Gauge
-              size={20}
+              size={16}
               className="text-dim flex-none"
               aria-hidden="true"
             />
@@ -87,7 +87,7 @@ export function ProgressPanel() {
               {mode === "probing" ? (
                 <Skeleton className="h-5.5 w-16" />
               ) : (
-                <span className="text-text text-base font-bold">
+                <span className="text-text text-sm font-bold">
                   {progress?.mbps
                     ? `${progress.mbps.toFixed(1)} MB/s`
                     : "0.0 MB/s"}
@@ -96,9 +96,9 @@ export function ProgressPanel() {
             </div>
           </div>
 
-          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+          <div className="border-line flex items-center gap-2 border bg-black/20 p-3">
             <FileText
-              size={20}
+              size={16}
               className="text-dim flex-none"
               aria-hidden="true"
             />
@@ -110,7 +110,7 @@ export function ProgressPanel() {
               {mode === "probing" ? (
                 <Skeleton className="h-5.5 w-12" />
               ) : (
-                <span className="text-text text-base font-bold">
+                <span className="text-text text-sm font-bold">
                   {progress?.filesTotal
                     ? `${progress.filesDone} / ${progress.filesTotal}`
                     : "0 / 0"}
@@ -119,23 +119,23 @@ export function ProgressPanel() {
             </div>
           </div>
 
-          <div className="border-line flex items-center gap-3 border bg-black/20 p-3">
+          <div className="border-line flex items-center gap-2 border bg-black/20 p-2.5">
             <Download
-              size={20}
+              size={16}
               className="text-dim flex-none"
               aria-hidden="true"
             />
             <div className="bg-line/50 h-5.5 w-px flex-none" />
             <div className="flex min-w-0 flex-1 items-center justify-between">
               <span className="text-dim text-[10px] font-bold tracking-wider uppercase">
-                Downloaded
+                Data
               </span>
               {mode === "probing" ? (
                 <Skeleton className="h-5 w-20" />
               ) : (
-                <span className="text-text text-base font-bold">
+                <span className="text-text text-sm font-bold">
                   {progress?.totalMb
-                    ? `${progress.downloadedMb?.toFixed(1)} / ${progress.totalMb.toFixed(1)} MB`
+                    ? `${progress.downloadedMb?.toFixed(0)} / ${progress.totalMb.toFixed(0)} MB`
                     : "0 MB"}
                 </span>
               )}

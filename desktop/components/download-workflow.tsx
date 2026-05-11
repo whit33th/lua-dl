@@ -48,9 +48,6 @@ export function DownloadWorkflow({
     if (settings.outputDir) {
       await window.luaDl?.ensureDirectory(settings.outputDir);
     }
-    if (downloadSettings.outputDir) {
-      await window.luaDl?.ensureDirectory(downloadSettings.outputDir);
-    }
 
     void onDownload(
       buildDownloadCommand({
