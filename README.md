@@ -4,7 +4,8 @@ A desktop application for easily downloading games and applications from Steam S
 
 
 <img width="1922" height="1076" alt="image" src="https://github.com/user-attachments/assets/36cd3ba6-7312-4995-a1bd-b10d889c4ce8" />
-<img width="1925" height="1084" alt="image" src="https://github.com/user-attachments/assets/a680f874-77bf-45e8-9d88-192a02f2ce4c" />
+<img width="1899" height="1069" alt="image" src="https://github.com/user-attachments/assets/52406769-af59-405f-8d8d-747fa7bcd439" />
+
 
 
 ## Getting Started
