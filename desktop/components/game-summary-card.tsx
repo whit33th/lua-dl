@@ -91,7 +91,7 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
         raysOrigin="left"
         raysColor="#ffffff"
         raysSpeed={1}
-        lightSpread={1}
+        lightSpread={0.9}
         rayLength={4}
         followMouse={true}
         mouseInfluence={0.1}
