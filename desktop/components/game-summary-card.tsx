@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CalendarDays, Gamepad2 } from "lucide-react";
 import { AnimatePresence, LazyMotion, m, domAnimation } from "motion/react";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Border } from "./ui/border";
 import { Skeleton } from "./ui/skeleton";
 import LightRays from "./ui/light-rays";
@@ -36,7 +36,10 @@ const snapSpring = {
   mass: 0.7,
 };
 
-export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
+export const GameSummaryCard = memo(function GameSummaryCard({
+  metadata,
+  mode,
+}: GameSummaryCardProps) {
   const [activeMedia, setActiveMedia] = useState<GameMedia>();
   const [selectedMedia, setSelectedMedia] = useState<GameMedia>();
   const screenshots = useMemo(
@@ -224,7 +227,7 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
       </m.div>
     </LazyMotion>
   );
-}
+});
 
 function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
   if (metadata) {

@@ -1,4 +1,8 @@
-import type { ColorRGB, Pointer, SplashCursorProps } from "./splash-cursor-types";
+import type {
+  ColorRGB,
+  Pointer,
+  SplashCursorProps,
+} from "./splash-cursor-types";
 import { pointerPrototype, HSVtoRGB, wrap } from "./splash-cursor-types";
 import {
   baseVertexShaderSource,
@@ -698,6 +702,7 @@ export function initFluidSimulation(
 
   let lastUpdateTime = Date.now();
   let colorUpdateTimer = 0.0;
+  let animationId: number | null = null;
 
   function updateFrame() {
     const dt = calcDeltaTime();
@@ -706,7 +711,7 @@ export function initFluidSimulation(
     applyInputs();
     step(dt);
     render(null);
-    requestAnimationFrame(updateFrame);
+    animationId = requestAnimationFrame(updateFrame);
   }
 
   function calcDeltaTime() {
@@ -824,10 +829,7 @@ export function initFluidSimulation(
       );
     }
     if (pressureProgram.uniforms.uDivergence) {
-      gl.uniform1i(
-        pressureProgram.uniforms.uDivergence,
-        divergence.attach(0),
-      );
+      gl.uniform1i(pressureProgram.uniforms.uDivergence, divergence.attach(0));
     }
     for (let i = 0; i < config.PRESSURE_ITERATIONS; i++) {
       if (pressureProgram.uniforms.uPressure) {
@@ -871,10 +873,7 @@ export function initFluidSimulation(
         velocity.texelSizeY,
       );
     }
-    if (
-      !ext.supportLinearFiltering &&
-      advectionProgram.uniforms.dyeTexelSize
-    ) {
+    if (!ext.supportLinearFiltering && advectionProgram.uniforms.dyeTexelSize) {
       gl.uniform2f(
         advectionProgram.uniforms.dyeTexelSize,
         velocity.texelSizeX,
@@ -900,10 +899,7 @@ export function initFluidSimulation(
     blit(velocity.write);
     velocity.swap();
 
-    if (
-      !ext.supportLinearFiltering &&
-      advectionProgram.uniforms.dyeTexelSize
-    ) {
+    if (!ext.supportLinearFiltering && advectionProgram.uniforms.dyeTexelSize) {
       gl.uniform2f(
         advectionProgram.uniforms.dyeTexelSize,
         dye.texelSizeX,
@@ -1040,12 +1036,8 @@ export function initFluidSimulation(
     pointer.prevTexcoordY = pointer.texcoordY;
     pointer.texcoordX = posX / canvas!.width;
     pointer.texcoordY = 1 - posY / canvas!.height;
-    pointer.deltaX = correctDeltaX(
-      pointer.texcoordX - pointer.prevTexcoordX,
-    )!;
-    pointer.deltaY = correctDeltaY(
-      pointer.texcoordY - pointer.prevTexcoordY,
-    )!;
+    pointer.deltaX = correctDeltaX(pointer.texcoordX - pointer.prevTexcoordX)!;
+    pointer.deltaY = correctDeltaY(pointer.texcoordY - pointer.prevTexcoordY)!;
     pointer.moved =
       Math.abs(pointer.deltaX) > 0 || Math.abs(pointer.deltaY) > 0;
     pointer.color = color;
@@ -1171,6 +1163,10 @@ export function initFluidSimulation(
   });
 
   return () => {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
     window.removeEventListener("mousedown", handleMouseDown);
     document.body.removeEventListener("mousemove", handleFirstMouseMove);
     window.removeEventListener("mousemove", handleMouseMove);

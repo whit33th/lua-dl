@@ -4,6 +4,7 @@ import type { DepotOption } from "@/lib/cli-types";
 import type { WorkflowMode } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { LazyMotion, m, domAnimation } from "motion/react";
+import { memo, useMemo } from "react";
 import { DepotIcon } from "./depot-icon";
 import { Skeleton } from "./ui/skeleton";
 
@@ -30,7 +31,10 @@ export function DepotGrid({
   selectedDepots,
   onToggleDepot,
 }: DepotGridProps) {
-  const optionalDepots = depots.filter((depot) => depot.kind !== "core");
+  const optionalDepots = useMemo(
+    () => depots.filter((depot) => depot.kind !== "core"),
+    [depots],
+  );
   const isLoading = optionalDepots.length === 0 && mode === "probing";
 
   return (
@@ -75,7 +79,7 @@ export function DepotGrid({
   );
 }
 
-function DepotCard({
+const DepotCard = memo(function DepotCard({
   depot,
   downloadAll,
   isSelected,
@@ -126,7 +130,7 @@ function DepotCard({
       </div>
     </m.label>
   );
-}
+});
 
 function DepotCardSkeleton() {
   return (

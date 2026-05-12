@@ -1,0 +1,3 @@
+{
+  "ignore": ["loader.js", "lib/cli-parser.ts"]
+}

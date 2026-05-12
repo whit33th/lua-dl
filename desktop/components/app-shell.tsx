@@ -87,7 +87,7 @@ export function AppShell() {
         setMode("failed");
       });
     },
-    [clearRun, setAppId, setMetadata, setMode, settings.verbose, startSession],
+    [clearRun, setAppId, setMetadata, setMode, settings, startSession],
   );
 
   const startDownload = useCallback(

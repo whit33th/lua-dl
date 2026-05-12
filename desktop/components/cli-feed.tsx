@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import type { LogEntry } from "@/lib/cli-types";
 
 function FormattedTime({ time }: { time: number }) {
   const [timeStr, setTimeStr] = useState(() =>
@@ -13,6 +14,26 @@ function FormattedTime({ time }: { time: number }) {
   }, [time]);
   return <time className="text-dim text-xs">{timeStr}</time>;
 }
+
+const LogItem = memo(function LogItem({
+  log,
+  keepRawLogs,
+}: {
+  log: LogEntry;
+  keepRawLogs: boolean;
+}) {
+  return (
+    <article
+      className="border-line/50 grid grid-cols-[84px_1fr] gap-3 border-b p-2.25"
+      data-level={log.level}
+    >
+      <FormattedTime time={log.time} />
+      <pre className="text-muted m-0 font-mono text-xs leading-[1.55] wrap-break-word whitespace-pre-wrap">
+        {keepRawLogs ? log.text : log.text.replace(/\s+/g, " ")}
+      </pre>
+    </article>
+  );
+});
 
 export function CliFeed() {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,16 +108,7 @@ export function CliFeed() {
                 <p className="text-muted">No output yet.</p>
               ) : null}
               {logs.map((log) => (
-                <article
-                  className="border-line/50 grid grid-cols-[84px_1fr] gap-3 border-b p-2.25"
-                  data-level={log.level}
-                  key={log.id}
-                >
-                  <FormattedTime time={log.time} />
-                  <pre className="text-muted m-0 font-mono text-xs leading-[1.55] wrap-break-word whitespace-pre-wrap">
-                    {keepRawLogs ? log.text : log.text.replace(/\s+/g, " ")}
-                  </pre>
-                </article>
+                <LogItem key={log.id} log={log} keepRawLogs={keepRawLogs} />
               ))}
               <div ref={endRef} />
             </div>

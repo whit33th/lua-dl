@@ -14,8 +14,7 @@ import { TechDecorativeCards } from "./tech-decorative-cards";
 
 export function ProgressPanel() {
   const mode = useAppStore((state) => state.mode);
-  const cli = useAppStore((state) => state.cli);
-  const progress = cli.progress;
+  const progress = useAppStore((state) => state.cli.progress);
   const percent = Math.max(
     0,
     Math.min(100, progress?.percent ?? (mode === "finished" ? 100 : 0)),

@@ -18,7 +18,7 @@ export function DownloadWorkflow({
 }: DownloadWorkflowProps) {
   const appId = useAppStore((state) => state.appId);
   const mode = useAppStore((state) => state.mode);
-  const cli = useAppStore((state) => state.cli);
+  const depots = useAppStore((state) => state.cli.depots);
   const metadata = useAppStore((state) => state.metadata);
   const selectedDepots = useAppStore((state) => state.selectedDepots);
   const downloadAll = useAppStore((state) => state.downloadAll);
@@ -77,7 +77,7 @@ export function DownloadWorkflow({
       />
 
       <DepotGrid
-        depots={cli.depots}
+        depots={depots}
         mode={mode}
         downloadAll={downloadAll}
         selectedDepots={selectedDepots}
