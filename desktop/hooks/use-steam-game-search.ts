@@ -2,38 +2,53 @@
 
 import { parseSteamAppId } from "@/lib/steam-app-id";
 import { searchSteamGames, type SteamSearchResult } from "@/lib/steam-metadata";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
+
+type SearchState = {
+  results: SteamSearchResult[];
+  isSearching: boolean;
+};
+
+type SearchAction =
+  | { type: "reset" }
+  | { type: "start" }
+  | { type: "done"; games: SteamSearchResult[] };
+
+function searchReducer(state: SearchState, action: SearchAction): SearchState {
+  switch (action.type) {
+    case "reset":
+      return { results: [], isSearching: false };
+    case "start":
+      return { ...state, isSearching: true };
+    case "done":
+      return { results: action.games, isSearching: false };
+    default:
+      return state;
+  }
+}
 
 export function useSteamGameSearch(query: string) {
-  const [results, setResults] = useState<SteamSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [state, dispatch] = useReducer(searchReducer, {
+    results: [],
+    isSearching: false,
+  });
 
   useEffect(() => {
     const trimmed = query.trim();
     if (trimmed.length < 2 || parseSteamAppId(trimmed)) {
-      setResults([]);
-      setIsSearching(false);
+      dispatch({ type: "reset" });
       return;
     }
 
     let cancelled = false;
-    setIsSearching(true);
+    dispatch({ type: "start" });
     const timeout = setTimeout(() => {
       void searchSteamGames(trimmed)
         .then((games) => {
-          if (!cancelled) {
-            setResults(games);
-          }
+          if (!cancelled) dispatch({ type: "done", games });
         })
         .catch(() => {
-          if (!cancelled) {
-            setResults([]);
-          }
-        })
-        .finally(() => {
-          if (!cancelled) {
-            setIsSearching(false);
-          }
+          if (!cancelled) dispatch({ type: "done", games: [] });
         });
     }, 180);
 
@@ -43,5 +58,9 @@ export function useSteamGameSearch(query: string) {
     };
   }, [query]);
 
-  return { results, isSearching, clearResults: () => setResults([]) };
+  return {
+    results: state.results,
+    isSearching: state.isSearching,
+    clearResults: () => dispatch({ type: "reset" }),
+  };
 }

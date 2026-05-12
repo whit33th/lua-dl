@@ -38,12 +38,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
               Preferences
             </p>
-            <h2 id="settings-title" className="m-0 text-2xl font-bold">
+            <h2 id="settings-title" className="m-0 text-2xl font-semibold">
               Settings
             </h2>
           </div>
           <button
-            className="border-line-strong bg-panel-strong text-text hover:border-text grid h-11 w-11 place-items-center rounded-4xl border transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
+            className="border-line-strong bg-panel-strong text-text hover:border-text grid size-11 place-items-center rounded-4xl border transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
             type="button"
             onClick={onClose}
             aria-label="Close settings"
@@ -53,7 +53,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </div>
 
         <div className="grid flex-1 gap-2.5">
-          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
+          <label
+            htmlFor="verbose-toggle"
+            aria-label="Verbose logging"
+            className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-neutral-950 p-3"
+          >
             <span>
               <strong className="block text-sm">Verbose logging</strong>
               <small className="text-muted mt-0.75 block text-xs">
@@ -61,14 +65,19 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               </small>
             </span>
             <input
+              id="verbose-toggle"
               type="checkbox"
               checked={settings.verbose}
               onChange={(event) => setVerbose(event.target.checked)}
-              className="h-4.5 w-4.5"
+              className="size-4.5"
             />
           </label>
 
-          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
+          <label
+            htmlFor="keep-logs-toggle"
+            aria-label="Keep raw logs"
+            className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-neutral-950 p-3"
+          >
             <span>
               <strong className="block text-sm">Keep raw logs</strong>
               <small className="text-muted mt-0.75 block text-xs">
@@ -76,14 +85,19 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               </small>
             </span>
             <input
+              id="keep-logs-toggle"
               type="checkbox"
               checked={settings.keepRawLogs}
               onChange={(event) => setKeepRawLogs(event.target.checked)}
-              className="h-4.5 w-4.5"
+              className="size-4.5"
             />
           </label>
 
-          <label className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-black p-3">
+          <label
+            htmlFor="density-toggle"
+            aria-label="Compact density"
+            className="border-line flex min-h-14.5 items-center justify-between rounded-4xl border bg-neutral-950 p-3"
+          >
             <span>
               <strong className="block text-sm">Compact density</strong>
               <small className="text-muted mt-0.75 block text-xs">
@@ -91,17 +105,18 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               </small>
             </span>
             <input
+              id="density-toggle"
               type="checkbox"
               checked={settings.density === "compact"}
               onChange={(event) =>
                 setDensity(event.target.checked ? "compact" : "comfortable")
               }
-              className="h-4.5 w-4.5"
+              className="size-4.5"
             />
           </label>
 
           <button
-            className="border-line text-text hover:border-text w-full overflow-hidden rounded-4xl border bg-black p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
+            className="border-line text-text hover:border-text w-full overflow-hidden rounded-4xl border bg-neutral-950 p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5"
             type="button"
             onClick={chooseDirectory}
             disabled={isSelectingLibrary}

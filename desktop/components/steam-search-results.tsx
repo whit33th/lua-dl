@@ -30,7 +30,12 @@ export function SteamSearchResults({
 
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={onDismiss} />
+      <button
+        type="button"
+        className="fixed inset-0 z-40 cursor-default bg-transparent"
+        onClick={onDismiss}
+        aria-label="Dismiss search results"
+      />
       <div
         ref={scrollContainerRef}
         className={cn(

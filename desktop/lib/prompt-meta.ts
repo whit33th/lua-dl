@@ -13,10 +13,10 @@ export function extractPromptMeta(
   }
 
   if (kind === "yes-no") {
-    const lines = text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const lines = text.split("\n").flatMap((line) => {
+      const trimmed = line.trim();
+      return trimmed ? [trimmed] : [];
+    });
     const questionLine = lines.find((line) =>
       /\[(y\/n|Y\/n|y\/N)\]/i.test(line),
     );
@@ -58,10 +58,10 @@ export function extractPromptMeta(
     return { title: "Confirm to continue", subtitle: "Confirmation required" };
   }
 
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = text.split("\n").flatMap((line) => {
+    const trimmed = line.trim();
+    return trimmed ? [trimmed] : [];
+  });
   const lastLine = lines.at(-1) ?? "";
   const clean = lastLine.replace(/:?\s*$/, "").trim();
   return {

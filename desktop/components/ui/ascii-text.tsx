@@ -85,11 +85,8 @@ class AsciiFilter {
   ) {
     this.renderer = renderer;
     this.domElement = document.createElement("div");
-    this.domElement.style.position = "absolute";
-    this.domElement.style.top = "0";
-    this.domElement.style.left = "0";
-    this.domElement.style.width = "100%";
-    this.domElement.style.height = "100%";
+    this.domElement.style.cssText =
+      "position:absolute;top:0;left:0;width:100%;height:100%;";
 
     this.pre = document.createElement("pre");
     this.domElement.appendChild(this.pre);
@@ -137,18 +134,7 @@ class AsciiFilter {
 
       this.canvas.width = this.cols;
       this.canvas.height = this.rows;
-      this.pre.style.fontFamily = this.fontFamily;
-      this.pre.style.fontSize = `${this.fontSize}px`;
-      this.pre.style.margin = "0";
-      this.pre.style.padding = "0";
-      this.pre.style.lineHeight = "1em";
-      this.pre.style.position = "absolute";
-      this.pre.style.left = "50%";
-      this.pre.style.top = "50%";
-      this.pre.style.transform = "translate(-50%, -50%)";
-      this.pre.style.zIndex = "9";
-      this.pre.style.backgroundAttachment = "fixed";
-      this.pre.style.mixBlendMode = "difference";
+      this.pre.style.cssText = `font-family:${this.fontFamily};font-size:${this.fontSize}px;margin:0;padding:0;line-height:1em;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9;background-attachment:fixed;mix-blend-mode:difference;`;
     }
   }
 
@@ -424,7 +410,9 @@ class CanvAscii {
     this.setSize(this.width, this.height);
 
     this.container.addEventListener("mousemove", this.onMouseMove);
-    this.container.addEventListener("touchmove", this.onMouseMove);
+    this.container.addEventListener("touchmove", this.onMouseMove, {
+      passive: true,
+    });
   }
 
   setSize(w: number, h: number) {

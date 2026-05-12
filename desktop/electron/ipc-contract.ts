@@ -1,9 +1,4 @@
-export type SessionStatus =
-  | "starting"
-  | "running"
-  | "exited"
-  | "failed"
-  | "killed";
+type SessionStatus = "starting" | "running" | "exited" | "failed" | "killed";
 
 export type StartOptions = {
   cwd?: string;
@@ -12,22 +7,22 @@ export type StartOptions = {
   label?: string;
 };
 
-export type StartResult = {
+type StartResult = {
   sessionId: string;
 };
 
-export type DirectoryResult = {
+type DirectoryResult = {
   canceled: boolean;
   path?: string;
 };
 
-export type DefenderExclusionResult =
+type DefenderExclusionResult =
   | { status: "added"; path: string }
   | { status: "skipped"; path: string; message: string }
   | { status: "unsupported"; path: string; message: string }
   | { status: "failed"; path: string; message: string };
 
-export type EnsureDirectoryResult =
+type EnsureDirectoryResult =
   | { status: "exists"; path: string }
   | { status: "created"; path: string };
 
@@ -40,7 +35,7 @@ export type ParsedProgress = {
   filesTotal?: number;
 };
 
-export type PromptKind = "yes-no" | "picker" | "stdin";
+type PromptKind = "yes-no" | "picker" | "stdin";
 
 export type DetectedPrompt = {
   kind: PromptKind;
@@ -78,7 +73,7 @@ export type CliEvent =
       time: number;
     };
 
-export type UpdateStatus =
+type UpdateStatus =
   | "checking"
   | "available"
   | "not-available"
@@ -93,7 +88,7 @@ export type UpdateEvent = {
   message?: string;
 };
 
-export type LuaDlApi = {
+type LuaDlApi = {
   start(args: string[], options?: StartOptions): Promise<StartResult>;
   write(sessionId: string, input: string): Promise<void>;
   kill(sessionId: string): Promise<void>;
@@ -109,7 +104,7 @@ export type LuaDlApi = {
   onUpdateEvent(callback: (event: UpdateEvent) => void): () => void;
 };
 
-export type WindowControlApi = {
+type WindowControlApi = {
   minimize(): Promise<void>;
   maximize(): Promise<void>;
   close(): Promise<void>;

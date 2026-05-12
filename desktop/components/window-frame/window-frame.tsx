@@ -1,5 +1,14 @@
 ﻿"use client";
-import { Minus, Settings, Square, X, RefreshCw, AlertCircle, CheckCircle2, Download } from "lucide-react";
+import {
+  Minus,
+  Settings,
+  Square,
+  X,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  Download,
+} from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { useAppStore } from "@/lib/store";
@@ -16,7 +25,15 @@ export default function WindowFrame() {
       <div className="ml-2 flex items-center gap-2">
         {/* <Image src="/imgs/logo.png" alt="Logo" width={18} height={18} /> */}
         {/* <div className="size-4 bg-black"></div> */}
-        <video src="videos/square.mp4" autoPlay loop muted preload="auto" playsInline className="size-4 grayscale brightness-110" />
+        <video
+          src="videos/square.mp4"
+          autoPlay
+          loop
+          muted
+          preload="auto"
+          playsInline
+          className="size-4 brightness-110 grayscale"
+        />
       </div>
 
       <div
@@ -54,7 +71,7 @@ function UpdateIndicator() {
   const updateState = useAppStore((state) => state.updateState);
   const setUpdateModalOpen = useAppStore((state) => state.setUpdateModalOpen);
 
-  const handleClick = () => {
+  const openUpdateModalOrCheck = () => {
     if (updateState.type === "not-available") {
       void window.luaDl?.checkForUpdates();
     } else {
@@ -73,7 +90,7 @@ function UpdateIndicator() {
       case "error":
         return <AlertCircle size={16} className="text-red-400" />;
       case "checking":
-        return <RefreshCw size={16} className="animate-spin text-dim" />;
+        return <RefreshCw size={16} className="text-dim animate-spin" />;
       default:
         return <RefreshCw size={16} className="text-dim" />;
     }
@@ -81,7 +98,7 @@ function UpdateIndicator() {
 
   return (
     <button
-      onClick={handleClick}
+      onClick={openUpdateModalOrCheck}
       className={cn(
         "relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-white/5",
         updateState.type !== "not-available" && "bg-white/5",
@@ -94,9 +111,8 @@ function UpdateIndicator() {
     >
       {getIcon()}
       {updateState.type === "available" && (
-        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+        <span className="absolute top-1 right-1 size-2 animate-pulse rounded-full bg-blue-500" />
       )}
     </button>
   );
 }
-

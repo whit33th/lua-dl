@@ -36,7 +36,7 @@ export function ProgressPanel() {
           <div className="flex items-center justify-between">
             <h2
               id="progress-title"
-              className="text-text m-0 truncate text-xl font-bold"
+              className="text-text m-0 truncate text-xl font-semibold"
             >
               Status
             </h2>

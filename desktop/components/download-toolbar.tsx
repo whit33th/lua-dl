@@ -40,7 +40,7 @@ export function DownloadToolbar({
         </label>
 
         <button
-          className="border-line text-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 opacity-80 transition-[opacity,background-color,border-color] hover:bg-black/80 hover:opacity-100"
+          className="border-line text-text flex size-10 cursor-pointer items-center justify-center rounded-lg border bg-black/50 opacity-80 transition-[opacity,background-color,border-color] hover:bg-black/80 hover:opacity-100"
           type="button"
           title={outputDir || "Default folder"}
           onClick={onChooseDirectory}
@@ -52,7 +52,7 @@ export function DownloadToolbar({
       {isDownloading ? (
         <div className="flex gap-2">
           <button
-            className="border-line flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
+            className="border-line flex size-10 cursor-pointer items-center justify-center rounded-lg border bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/20"
             type="button"
             title="Stop"
             onClick={onStop}
@@ -67,7 +67,11 @@ export function DownloadToolbar({
           disabled={!canDownload}
           onClick={onDownload}
         >
-          <Play size={16} aria-hidden="true" className="text-black fill-black" />
+          <Play
+            size={16}
+            aria-hidden="true"
+            className="fill-black text-black"
+          />
           Start
         </button>
       )}

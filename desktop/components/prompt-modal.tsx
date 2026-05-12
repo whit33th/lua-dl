@@ -15,12 +15,17 @@ export function PromptModal() {
   const phase = useAppStore((state) => state.cli.phase);
   const logs = useAppStore((state) => state.logs);
   const sessionId = useAppStore((state) => state.activeSessionId);
+  const promptKeyRef = useRef("");
 
-  useEffect(() => {
-    if (prompt) {
-      panelRef.current?.querySelector<HTMLElement>("button, input")?.focus();
+  const setPanelRef = (node: HTMLDivElement | null) => {
+    if (!node) return;
+    const key = prompt ? `${prompt.kind}-${prompt.text.slice(0, 20)}` : "";
+    if (key && promptKeyRef.current !== key) {
+      promptKeyRef.current = key;
+      node.querySelector<HTMLElement>("button, input")?.focus();
     }
-  }, [prompt]);
+    panelRef.current = node;
+  };
 
   if (!prompt || !sessionId) {
     return null;
@@ -48,15 +53,15 @@ export function PromptModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="prompt-title"
-        ref={panelRef}
+        ref={setPanelRef}
       >
         <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
           {subtitle}
         </p>
-        <h2 id="prompt-title" className="m-0 mb-3.5 text-2xl font-bold">
+        <h2 id="prompt-title" className="m-0 mb-3.5 text-2xl font-semibold">
           {title}
         </h2>
-        <pre className="border-line text-muted max-h-65 overflow-auto rounded-4xl border bg-black p-3.5 font-mono text-xs whitespace-pre-wrap">
+        <pre className="border-line text-muted max-h-65 overflow-auto rounded-4xl border bg-neutral-950 p-3.5 font-mono text-xs whitespace-pre-wrap">
           {prompt.text}
         </pre>
 

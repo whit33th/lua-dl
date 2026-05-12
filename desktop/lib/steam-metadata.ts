@@ -16,18 +16,18 @@ export type SteamMetadata = {
   isFallback?: boolean;
 };
 
-export type SteamTag = {
+type SteamTag = {
   id: number;
   description: string;
 };
 
-export type SteamScreenshot = {
+type SteamScreenshot = {
   id: number;
   thumbnail: string;
   full: string;
 };
 
-export type SteamMovie = {
+type SteamMovie = {
   id: number;
   name: string;
   thumbnail?: string;
@@ -183,45 +183,54 @@ function normalizeStringArray(value: unknown) {
 
 function normalizeTags(value: unknown): SteamTag[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value
-    .filter((item) => item?.id && item?.description)
-    .map((item) => ({
-      id: Number(item.id),
-      description: String(item.description),
-    }));
+  const out: SteamTag[] = [];
+  for (const item of value) {
+    if (item?.id && item?.description) {
+      out.push({ id: Number(item.id), description: String(item.description) });
+    }
+  }
+  return out;
 }
 
 function normalizeScreenshots(value: unknown): SteamScreenshot[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value
-    .filter((item) => item?.id && item?.path_thumbnail && item?.path_full)
-    .map((item) => ({
-      id: Number(item.id),
-      thumbnail: String(item.path_thumbnail),
-      full: String(item.path_full),
-    }));
+  const out: SteamScreenshot[] = [];
+  for (const item of value) {
+    if (item?.id && item?.path_thumbnail && item?.path_full) {
+      out.push({
+        id: Number(item.id),
+        thumbnail: String(item.path_thumbnail),
+        full: String(item.path_full),
+      });
+    }
+  }
+  return out;
 }
 
 function normalizeMovies(value: unknown): SteamMovie[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  return value
-    .filter((item) => item?.id && item?.name)
-    .map((item) => ({
-      id: Number(item.id),
-      name: String(item.name),
-      thumbnail:
-        typeof item.thumbnail === "string" ? item.thumbnail : undefined,
-      mp4:
-        typeof item.mp4?.max === "string"
-          ? item.mp4.max
-          : typeof item.mp4?.["480"] === "string"
-            ? item.mp4["480"]
-            : typeof item.hls_h264 === "string"
-              ? item.hls_h264
-              : typeof item.dash_h264 === "string"
-                ? item.dash_h264
-                : undefined,
-    }));
+  const out: SteamMovie[] = [];
+  for (const item of value) {
+    if (item?.id && item?.name) {
+      out.push({
+        id: Number(item.id),
+        name: String(item.name),
+        thumbnail:
+          typeof item.thumbnail === "string" ? item.thumbnail : undefined,
+        mp4:
+          typeof item.mp4?.max === "string"
+            ? item.mp4.max
+            : typeof item.mp4?.["480"] === "string"
+              ? item.mp4["480"]
+              : typeof item.hls_h264 === "string"
+                ? item.hls_h264
+                : typeof item.dash_h264 === "string"
+                  ? item.dash_h264
+                  : undefined,
+      });
+    }
+  }
+  return out;
 }
 
 function stripHtml(value: unknown) {

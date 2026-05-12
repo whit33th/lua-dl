@@ -25,7 +25,7 @@ export function buildGameInstallPath(libraryRoot: string, gameName: string) {
   return joinPath(libraryRoot, sanitizeGameFolderName(gameName));
 }
 
-export function sanitizeGameFolderName(name: string) {
+function sanitizeGameFolderName(name: string) {
   let sanitized = name
     .replace(forbiddenWindowsPathChars, "-")
     .replace(repeatedSpaces, " ")

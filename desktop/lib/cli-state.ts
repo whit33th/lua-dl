@@ -49,10 +49,10 @@ export function reduceCliState(
 }
 
 function parsePhase(text: string) {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = text.split("\n").flatMap((line) => {
+    const trimmed = line.trim();
+    return trimmed ? [trimmed] : [];
+  });
   return lines.find((line) => line.startsWith("▸"))?.replace(/^▸\s*/, "");
 }
 

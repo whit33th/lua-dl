@@ -50,8 +50,8 @@ export function UpdateModalContent({
 
   if (updateState.type === "downloaded") {
     return (
-      <div className="flex flex-col items-center justify-center space-y-4 py-4 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 text-green-400">
+      <div className="flex flex-col items-center justify-center gap-y-4 py-4 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-green-500/20 text-green-400">
           <CheckCircle2 size={32} />
         </div>
         <div className="space-y-2">

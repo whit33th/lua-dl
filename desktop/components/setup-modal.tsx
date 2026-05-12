@@ -55,7 +55,7 @@ export function SetupModal() {
             <p className="text-dim m-0 mb-1.5 text-xs font-bold uppercase">
               First launch setup
             </p>
-            <h2 id="setup-title" className="m-0 text-2xl font-bold">
+            <h2 id="setup-title" className="m-0 text-2xl font-semibold">
               Choose install location
             </h2>
           </div>
@@ -69,7 +69,7 @@ export function SetupModal() {
           type="button"
           onClick={chooseLibraryFolder}
           disabled={isSelectingLibrary}
-          className="border-line text-text hover:border-text mb-4 w-full overflow-hidden rounded-4xl border bg-black p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-line text-text hover:border-text mb-4 w-full overflow-hidden rounded-4xl border bg-neutral-950 p-3 text-left text-ellipsis whitespace-nowrap transition-[border-color,translate,background-color,color] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {selectedParentFolder || "Choose location"}
         </button>
@@ -105,7 +105,7 @@ export function SetupModal() {
           disabled={isSelectingLibrary || !libraryPath}
           className="bg-text text-panel-strong border-line-strong inline-flex w-full items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Continue
+          Finish setup
         </button>
       </section>
     </div>

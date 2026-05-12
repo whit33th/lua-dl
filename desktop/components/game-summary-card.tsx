@@ -4,7 +4,7 @@ import type { SteamMetadata } from "@/lib/steam-metadata";
 import type { WorkflowMode } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { CalendarDays, Gamepad2 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, LazyMotion, m, domAnimation } from "motion/react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Border } from "./ui/border";
@@ -80,179 +80,190 @@ export function GameSummaryCard({ metadata, mode }: GameSummaryCardProps) {
   }, [metadata?.appId]);
 
   return (
-    <motion.div
-      className="border-line group relative flex-none border backdrop-blur-sm"
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.48, ease: mediaEase }}
-    >
-      <Border />
-      <LightRays
-        raysOrigin="left"
-        raysColor="#ffffff"
-        raysSpeed={1}
-        lightSpread={0.9}
-        rayLength={4}
-        followMouse={true}
-        mouseInfluence={0.1}
-        noiseAmount={1}
-        distortion={0}
-        className="custom-rays w-full h-full absolute inset-0 opacity-80"
-        pulsating={false}
-        fadeDistance={1}
-        saturation={1}
-      />
-      <div className="absolute inset-0 overflow-x-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-        <AnimatePresence initial={false}>
-          {backdropSrc && (
-            <motion.div
-              key={`bg-${backdropSrc}`}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.34, ease: mediaEase }}
-            >
-              <Image
-                src={backdropSrc}
-                width={460}
-                height={215}
-                alt=""
-                className={cn(
-                  "h-full w-full object-cover blur-lg brightness-85 transition-[filter] duration-300 group-hover:brightness-80",
-                  mode === "downloading" ? "animate-pulse-slow" : "",
-                )}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <motion.div
-        className="relative flex gap-5 p-5"
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: {},
-          show: {
-            transition: {
-              staggerChildren: 0.065,
-              delayChildren: 0.06,
-            },
-          },
-        }}
+    <LazyMotion features={domAnimation}>
+      <m.div
+        className="border-line group relative flex-none border backdrop-blur-sm"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.48, ease: mediaEase }}
       >
-        <motion.div
-          className="flex w-[460px] flex-none flex-col gap-2"
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            show: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.42, ease: mediaEase },
-            },
-          }}
-        >
-          <div className="border-line relative aspect-92/43 w-full overflow-hidden border bg-black shadow-2xl">
-            {activeSrc ? (
-              <motion.div
-                key={`main-${effectiveMedia?.id ?? activeSrc}`}
+        <Border />
+        <LightRays
+          raysOrigin="left"
+          raysColor="#ffffff"
+          raysSpeed={1}
+          lightSpread={0.9}
+          rayLength={4}
+          followMouse={true}
+          mouseInfluence={0.1}
+          noiseAmount={1}
+          distortion={0}
+          className="custom-rays absolute inset-0 h-full w-full opacity-80"
+          pulsating={false}
+          fadeDistance={1}
+          saturation={1}
+        />
+        <div className="absolute inset-0 overflow-x-hidden">
+          <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
+          <AnimatePresence initial={false}>
+            {backdropSrc && (
+              <m.div
+                key={`bg-${backdropSrc}`}
                 className="absolute inset-0"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.24, ease: mediaEase }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.34, ease: mediaEase }}
               >
-                {effectiveMedia?.kind === "movie" ? (
-                  <video
-                    src={effectiveMedia.src}
-                    poster={effectiveMedia.thumbnail}
-                    className="h-full w-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                ) : (
-                  <Image
-                    src={activeSrc}
-                    width={460}
-                    height={215}
-                    alt=""
-                    className={cn(
-                      "object-cover",
-                      mode === "downloading" && "animate-pulse-slow",
-                    )}
-                    loading="eager"
-                    priority
-                    fetchPriority="high"
-                  />
-                )}
-              </motion.div>
-            ) : mode === "probing" ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              <div className="z-11 flex h-full w-full items-center justify-center bg-white/5">
-                <Gamepad2 size={48} className="text-white/95" />
-              </div>
+                <Image
+                  src={backdropSrc}
+                  width={460}
+                  height={215}
+                  alt=""
+                  className={cn(
+                    "h-full w-full object-cover blur-lg brightness-85 transition-[filter] duration-300 group-hover:brightness-80",
+                    mode === "downloading" ? "animate-pulse-slow" : "",
+                  )}
+                />
+              </m.div>
             )}
-          </div>
+          </AnimatePresence>
+        </div>
 
-          <ScreenshotStrip
-            items={mediaItems}
-            selectedId={selectedMedia?.id}
-            onPreview={setActiveMedia}
-            onSelect={setSelectedMedia}
-          />
-        </motion.div>
-
-        <motion.div
-          className="flex min-w-0 flex-1 flex-col justify-start pt-3"
+        <m.div
+          className="relative flex gap-5 p-5"
+          initial="hidden"
+          animate="show"
           variants={{
-            hidden: { opacity: 0, x: 12 },
+            hidden: {},
             show: {
-              opacity: 1,
-              x: 0,
-              transition: { duration: 0.44, ease: mediaEase },
+              transition: {
+                staggerChildren: 0.065,
+                delayChildren: 0.06,
+              },
             },
           }}
         >
-          <GameSummaryDetails metadata={metadata} mode={mode} />
-        </motion.div>
-      </motion.div>
-    </motion.div>
+          <m.div
+            className="flex w-[460px] flex-none flex-col gap-2"
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              show: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.42, ease: mediaEase },
+              },
+            }}
+          >
+            <div className="border-line relative aspect-92/43 w-full overflow-hidden border bg-neutral-950 shadow-2xl">
+              {activeSrc ? (
+                <m.div
+                  key={`main-${effectiveMedia?.id ?? activeSrc}`}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.24, ease: mediaEase }}
+                >
+                  {effectiveMedia?.kind === "movie" ? (
+                    <video
+                      src={effectiveMedia.src}
+                      poster={effectiveMedia.thumbnail}
+                      className="h-full w-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <Image
+                      src={activeSrc}
+                      width={460}
+                      height={215}
+                      alt=""
+                      className={cn(
+                        "object-cover",
+                        mode === "downloading" && "animate-pulse-slow",
+                      )}
+                      loading="eager"
+                      priority
+                      fetchPriority="high"
+                    />
+                  )}
+                </m.div>
+              ) : mode === "probing" ? (
+                <Skeleton className="h-full w-full" />
+              ) : (
+                <div className="z-11 flex h-full w-full items-center justify-center bg-white/5">
+                  <Gamepad2 size={48} className="text-white/95" />
+                </div>
+              )}
+            </div>
+
+            <ScreenshotStrip
+              items={mediaItems}
+              selectedId={selectedMedia?.id}
+              onPreview={setActiveMedia}
+              onSelect={setSelectedMedia}
+            />
+          </m.div>
+
+          <m.div
+            className="flex min-w-0 flex-1 flex-col justify-start pt-3"
+            variants={{
+              hidden: { opacity: 0, x: 12 },
+              show: {
+                opacity: 1,
+                x: 0,
+                transition: { duration: 0.44, ease: mediaEase },
+              },
+            }}
+          >
+            <GameSummaryDetails metadata={metadata} mode={mode} />
+          </m.div>
+        </m.div>
+      </m.div>
+    </LazyMotion>
   );
 }
 
 function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
   if (metadata) {
-    const tags = [...(metadata.genres ?? []), ...(metadata.categories ?? [])]
-      .map((tag) => tag.description)
-      .filter((tag, index, all) => all.indexOf(tag) === index)
-      .slice(0, 5);
+    const seen = new Set<string>();
+    const tags: string[] = [];
+    for (const tag of [
+      ...(metadata.genres ?? []),
+      ...(metadata.categories ?? []),
+    ]) {
+      const desc = tag.description;
+      if (!seen.has(desc)) {
+        seen.add(desc);
+        tags.push(desc);
+        if (tags.length >= 5) break;
+      }
+    }
 
     return (
-      <motion.div
+      <m.div
         className="flex flex-col gap-1"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42, ease: mediaEase }}
       >
         <div className="flex min-w-0 items-start justify-between gap-3">
-          <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-bold tracking-tight 2xl:text-[2.1rem]">
+          <h3 className="text-text m-0 line-clamp-2 text-3xl leading-none font-semibold tracking-tight 2xl:text-[2.1rem]">
             {metadata.name}
           </h3>
         </div>
 
         <div className="mt-2 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <motion.span
+            <m.span
               key={tag}
               className="bg-white/12 px-2 py-1 text-[10px] leading-none font-black tracking-wide text-white/85 uppercase shadow-[inset_2px_0_0_rgba(255,255,255,0.35)] 2xl:text-xs"
               transition={snapSpring}
             >
               {tag}
-            </motion.span>
+            </m.span>
           ))}
         </div>
 
@@ -293,7 +304,7 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
             {metadata.shortDescription}
           </p>
         ) : null}
-      </motion.div>
+      </m.div>
     );
   }
 
@@ -308,7 +319,7 @@ function GameSummaryDetails({ metadata, mode }: GameSummaryCardProps) {
 
   return (
     <>
-      <h3 className="text-text m-0 truncate text-4xl leading-tight font-bold">
+      <h3 className="text-text m-0 truncate text-4xl leading-tight font-semibold">
         Waiting
       </h3>
       <div className="mt-1 flex items-center gap-2">
@@ -367,7 +378,7 @@ function ScreenshotStrip({
         ›
       </button>
 
-      <motion.div
+      <m.div
         ref={scrollRef}
         onWheel={onWheel}
         className="scrollbar-hide flex gap-1.5 overflow-x-auto scroll-smooth pr-1"
@@ -386,7 +397,7 @@ function ScreenshotStrip({
         {items.map((item) => {
           const isSelected = item.id === selectedId;
           return (
-            <motion.button
+            <m.button
               key={item.id}
               type="button"
               className={cn(
@@ -425,10 +436,10 @@ function ScreenshotStrip({
                   ▶
                 </span>
               ) : null}
-            </motion.button>
+            </m.button>
           );
         })}
-      </motion.div>
+      </m.div>
     </div>
   );
 }

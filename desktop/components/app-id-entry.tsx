@@ -5,7 +5,7 @@ import { parseSteamAppId } from "@/lib/steam-app-id";
 import type { SteamSearchResult } from "@/lib/steam-metadata";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Loader2, Search } from "lucide-react";
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SteamSearchResults } from "./steam-search-results";
 import { Border } from "./ui/border";
 
@@ -27,21 +27,25 @@ export function AppIdEntry({
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { results, isSearching, clearResults } = useSteamGameSearch(value);
 
-  useEffect(() => {
-    setShowDropdown(results.length > 0);
-    setSelectedIndex(results.length > 0 ? 0 : -1);
-  }, [results]);
+  useLayoutEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
-    if (selectedIndex >= 0 && scrollContainerRef.current) {
+    const hasResults = results.length > 0;
+    setShowDropdown(hasResults);
+    const nextIndex = hasResults ? 0 : -1;
+    setSelectedIndex(nextIndex);
+    if (nextIndex >= 0 && scrollContainerRef.current) {
       const activeElement = scrollContainerRef.current.children[
-        selectedIndex
+        nextIndex
       ] as HTMLElement;
       activeElement?.scrollIntoView({ block: "nearest" });
     }
-  }, [selectedIndex]);
+  }, [results]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,14 +82,25 @@ export function AppIdEntry({
       return;
     }
 
+    function scrollToIndex(index: number) {
+      if (index >= 0 && scrollContainerRef.current) {
+        const activeElement = scrollContainerRef.current.children[
+          index
+        ] as HTMLElement;
+        activeElement?.scrollIntoView({ block: "nearest" });
+      }
+    }
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setSelectedIndex((previous) => (previous + 1) % results.length);
+      const next = (selectedIndex + 1) % results.length;
+      setSelectedIndex(next);
+      scrollToIndex(next);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      setSelectedIndex(
-        (previous) => (previous - 1 + results.length) % results.length,
-      );
+      const next = (selectedIndex - 1 + results.length) % results.length;
+      setSelectedIndex(next);
+      scrollToIndex(next);
     } else if (event.key === "Escape") {
       setShowDropdown(false);
     }
@@ -94,7 +109,7 @@ export function AppIdEntry({
   return (
     <div className="relative w-full">
       <form
-        className="border-line relative flex w-full items-stretch bg-black/80 font-mono transition-colors focus-within:bg-black"
+        className="border-line relative flex w-full items-stretch bg-black/80 font-mono transition-colors focus-within:bg-neutral-950"
         onSubmit={handleSubmit}
         onFocus={() => results.length > 0 && setShowDropdown(true)}
       >
@@ -106,6 +121,7 @@ export function AppIdEntry({
           <Search size={20} />
         </div>
         <input
+          ref={inputRef}
           id="app-id"
           placeholder="Game name"
           value={value}
@@ -115,7 +131,6 @@ export function AppIdEntry({
           }}
           onKeyDown={handleKeyDown}
           autoComplete="off"
-          autoFocus={isSplash}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "app-id-error" : undefined}
           className="text-text placeholder:text-text/30 relative h-16 w-full min-w-0 bg-transparent px-4 text-2xl font-bold outline-none disabled:cursor-not-allowed disabled:opacity-50"

@@ -6,7 +6,7 @@ import { buildProbeCommand } from "@/lib/cli-commands";
 import { fallbackMetadata, fetchSteamMetadata } from "@/lib/steam-metadata";
 import { parseSteamAppId } from "@/lib/steam-app-id";
 import { useAppStore } from "@/lib/store";
-import { motion } from "motion/react";
+import { LazyMotion, m, domAnimation } from "motion/react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { AppIdEntry } from "./app-id-entry";
 import { CliFeed } from "./cli-feed";
@@ -108,7 +108,7 @@ export function AppShell() {
   const isIdle = mode === "idle" && !appId;
 
   return (
-    <>
+    <LazyMotion features={domAnimation}>
       {isIdle ? (
         <SplashScreen
           isPending={isPending}
@@ -130,7 +130,7 @@ export function AppShell() {
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               <GameSummaryCard metadata={metadata} mode={mode} />
 
-              <motion.div
+              <m.div
                 className="border-line relative min-h-0 flex-1 border"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export function AppShell() {
                   onDownload={startDownload}
                   onStop={stopActiveSession}
                 />
-              </motion.div>
+              </m.div>
             </div>
 
             <aside
@@ -165,6 +165,6 @@ export function AppShell() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-    </>
+    </LazyMotion>
   );
 }

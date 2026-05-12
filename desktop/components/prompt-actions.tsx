@@ -3,7 +3,11 @@
 import { ArrowDown, ArrowUp, Check, X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
-export function YesNoPromptActions({ onWrite }: { onWrite(input: string): void }) {
+export function YesNoPromptActions({
+  onWrite,
+}: {
+  onWrite(input: string): void;
+}) {
   return (
     <div className="mt-3.5 flex flex-wrap gap-2.5">
       <button
@@ -15,7 +19,7 @@ export function YesNoPromptActions({ onWrite }: { onWrite(input: string): void }
         Yes
       </button>
       <button
-        className="border-line-strong text-text inline-flex items-center justify-center gap-2.25 rounded-4xl border bg-black px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
+        className="border-line-strong text-text inline-flex items-center justify-center gap-2.25 rounded-4xl border bg-neutral-950 px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
         type="button"
         onClick={() => onWrite("n\r")}
       >
@@ -26,13 +30,23 @@ export function YesNoPromptActions({ onWrite }: { onWrite(input: string): void }
   );
 }
 
-export function PickerPromptActions({ onWrite }: { onWrite(input: string): void }) {
+export function PickerPromptActions({
+  onWrite,
+}: {
+  onWrite(input: string): void;
+}) {
   return (
     <div className="mt-3.5 flex flex-wrap gap-2.5">
-      <PickerButton onClick={() => onWrite("\u001b[A")} ariaLabel="Move selection up">
+      <PickerButton
+        onClick={() => onWrite("\u001b[A")}
+        ariaLabel="Move selection up"
+      >
         <ArrowUp size={17} aria-hidden="true" />
       </PickerButton>
-      <PickerButton onClick={() => onWrite("\u001b[B")} ariaLabel="Move selection down">
+      <PickerButton
+        onClick={() => onWrite("\u001b[B")}
+        ariaLabel="Move selection down"
+      >
         <ArrowDown size={17} aria-hidden="true" />
       </PickerButton>
       <PickerButton onClick={() => onWrite(" ")}>Toggle</PickerButton>
@@ -68,8 +82,7 @@ export function StdinPromptForm({ onWrite }: { onWrite(input: string): void }) {
       <input
         value={textValue}
         onChange={(event) => setTextValue(event.target.value)}
-        autoFocus
-        className="border-line-strong text-text min-w-0 rounded-4xl border bg-black px-3 py-2"
+        className="border-line-strong text-text min-w-0 rounded-4xl border bg-neutral-950 px-3 py-2"
       />
       <button
         className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
