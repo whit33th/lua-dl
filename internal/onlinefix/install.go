@@ -12,9 +12,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/nwaples/rardecode/v2"
 
+	"github.com/hoangvu12/lua-dl/internal/defender"
 	"github.com/hoangvu12/lua-dl/internal/ui"
 )
 
@@ -53,20 +55,78 @@ func apply(ctx context.Context, client *http.Client, pageURL, gameDir string) er
 	defer os.RemoveAll(tmpRoot)
 
 	for _, name := range rars {
-		rarURL := fixListURL + strings.ReplaceAll(name, " ", "%20")
+		rarURL := fixListURL + url.PathEscape(name)
 		if err := downloadRAR(ctx, client, rarURL, pageURL, filepath.Join(tmpRoot, name), name); err != nil {
 			return fmt.Errorf("download %s: %w", name, err)
 		}
+	}
+
+	ui.Step("adding Defender exclusion for Online-Fix files · click Yes in the popup")
+	if err := defender.AddExclusion(gameDir); err != nil {
+		return fmt.Errorf("auto-fix failed — add this folder to Defender exclusions manually and retry:\n     %s", gameDir)
 	}
 
 	primary := filepath.Join(tmpRoot, primaryRAR(rars))
 	ui.Step(fmt.Sprintf("extracting %s", filepath.Base(primary)))
 	n, err := extractOver(primary, gameDir)
 	if err != nil {
+		if defender.IsBlockedError(err) {
+			n, err = retryAfterDefenderExclusion(primary, gameDir)
+			if err == nil {
+				ui.LastStep(fmt.Sprintf("applied %d %s", n, ui.Plural(n, "file", "files")))
+				return nil
+			}
+		}
 		return fmt.Errorf("extract: %w", err)
+	}
+	if missing := missingOnlineFixLoaders(gameDir); len(missing) > 0 {
+		ui.Step(fmt.Sprintf("Online-Fix files missing after extract (%s) · click Yes in the popup to fix", strings.Join(missing, ", ")))
+		n, err = retryAfterDefenderExclusion(primary, gameDir)
+		if err != nil {
+			return err
+		}
 	}
 	ui.LastStep(fmt.Sprintf("applied %d %s", n, ui.Plural(n, "file", "files")))
 	return nil
+}
+
+func retryAfterDefenderExclusion(primary, gameDir string) (int, error) {
+	if exclErr := defender.AddExclusion(gameDir); exclErr != nil {
+		return 0, fmt.Errorf("auto-fix failed — add this folder to Defender exclusions manually and retry:\n     %s", gameDir)
+	}
+	ui.Step("exclusion added · extracting Online-Fix again")
+	n, err := extractOver(primary, gameDir)
+	if err != nil {
+		return n, fmt.Errorf("extract after exclusion: %w", err)
+	}
+	if missing := missingOnlineFixLoaders(gameDir); len(missing) > 0 {
+		return n, fmt.Errorf("Online-Fix files are still missing after exclusion: %s", strings.Join(missing, ", "))
+	}
+	return n, nil
+}
+
+func missingOnlineFixLoaders(gameDir string) []string {
+	// Defender can quarantine a just-written DLL shortly after extraction
+	// returns, so require the files to stay present for a short window.
+	var missing []string
+	for i := 0; i < 6; i++ {
+		missing = currentMissingOnlineFixLoaders(gameDir)
+		if len(missing) > 0 {
+			return missing
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return nil
+}
+
+func currentMissingOnlineFixLoaders(gameDir string) []string {
+	var missing []string
+	for _, name := range []string{"OnlineFix64.dll", "winmm.dll"} {
+		if _, err := os.Stat(filepath.Join(gameDir, name)); errors.Is(err, os.ErrNotExist) {
+			missing = append(missing, name)
+		}
+	}
+	return missing
 }
 
 var uploadSlugRE = regexp.MustCompile(`uploads\.online-fix\.me:2053/uploads/([^/"]+)/`)
@@ -98,7 +158,11 @@ func listRARs(ctx context.Context, client *http.Client, listURL, referer string)
 	}
 	var out []string
 	for _, m := range rarHrefRE.FindAllStringSubmatch(body, -1) {
-		out = append(out, strings.ReplaceAll(m[1], "%20", " "))
+		name, err := url.PathUnescape(m[1])
+		if err != nil {
+			name = m[1]
+		}
+		out = append(out, filepath.Base(filepath.FromSlash(name)))
 	}
 	return out, nil
 }
@@ -165,6 +229,9 @@ func extractOver(rarPath, gameDir string) (int, error) {
 			return n, err
 		}
 		dst := filepath.Join(gameDir, filepath.FromSlash(hdr.Name))
+		if !insideDir(gameDir, dst) {
+			return n, fmt.Errorf("refusing to extract outside game directory: %s", hdr.Name)
+		}
 		if hdr.IsDir {
 			if err := os.MkdirAll(dst, 0o755); err != nil {
 				return n, err
@@ -187,4 +254,17 @@ func extractOver(rarPath, gameDir string) (int, error) {
 		}
 		n++
 	}
+}
+
+func insideDir(root, path string) bool {
+	rootAbs, err := filepath.Abs(root)
+	if err != nil {
+		return false
+	}
+	pathAbs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	rel, err := filepath.Rel(rootAbs, pathAbs)
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
