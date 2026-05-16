@@ -327,7 +327,7 @@ const LightRays: React.FC<LightRaysProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        "pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-20",
+        "pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-20 opacity-80",
         className,
       )}
     />

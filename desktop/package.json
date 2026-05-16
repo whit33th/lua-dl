@@ -6,7 +6,7 @@
   "author": "whit33th",
   "main": "dist-electron/main.js",
   "scripts": {
-    "postinstall": "powershell -ExecutionPolicy Bypass -File scripts/patch-node-pty.ps1",
+    "postinstall": "electron-builder install-app-deps",
     "dev": "concurrently -k \"next dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "dev:next": "next dev",
     "build:go": "powershell -ExecutionPolicy Bypass -File scripts/build-go.ps1",
@@ -14,7 +14,7 @@
     "build:electron": "tsup",
     "build": "npm run build:next && npm run build:electron",
     "start": "electron .",
-    "dist": "npm run build:go && npm run build:next && npm run build:electron && dotenv -- electron-builder --win -p never"
+    "dist": "npm run build:go && npm run build:next && npm run build:electron && dotenv -- electron-builder --win -p always"
   },
   "dependencies": {
     "babel-plugin-react-compiler": "^1.0.0",
