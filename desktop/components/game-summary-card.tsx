@@ -85,7 +85,7 @@ export const GameSummaryCard = memo(function GameSummaryCard({
   return (
     <LazyMotion features={domAnimation}>
       <m.div
-        className="border-line group relative flex-none border backdrop-blur-sm"
+        className="border-line group relative  border"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.48, ease: mediaEase }}
@@ -96,17 +96,16 @@ export const GameSummaryCard = memo(function GameSummaryCard({
           raysColor="#ffffff"
           raysSpeed={1}
           lightSpread={0.9}
-          rayLength={4}
+          rayLength={4.5}
           followMouse={true}
           mouseInfluence={0.1}
-          noiseAmount={1}
+          noiseAmount={0.5}
           distortion={0}
-          className="custom-rays absolute inset-0 h-full w-full opacity-80"
           pulsating={false}
           fadeDistance={1}
           saturation={1}
         />
-        <div className="absolute inset-0 overflow-x-hidden">
+        <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
           <AnimatePresence initial={false}>
             {backdropSrc && (

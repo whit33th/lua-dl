@@ -45,6 +45,8 @@ export function PromptModal() {
       .map((log) => log.text)
       .join("\n"),
   });
+  const isSinglePicker =
+    prompt.kind === "picker" && /space choose/i.test(prompt.text);
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5 backdrop-blur-md">
@@ -68,7 +70,7 @@ export function PromptModal() {
         {prompt.kind === "yes-no" ? (
           <YesNoPromptActions onWrite={write} />
         ) : prompt.kind === "picker" ? (
-          <PickerPromptActions onWrite={write} />
+          <PickerPromptActions onWrite={write} single={isSinglePicker} />
         ) : (
           <StdinPromptForm onWrite={write} />
         )}

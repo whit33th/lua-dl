@@ -32,8 +32,10 @@ export function YesNoPromptActions({
 
 export function PickerPromptActions({
   onWrite,
+  single = false,
 }: {
   onWrite(input: string): void;
+  single?: boolean;
 }) {
   return (
     <div className="mt-3.5 flex flex-wrap gap-2.5">
@@ -49,9 +51,15 @@ export function PickerPromptActions({
       >
         <ArrowDown size={17} aria-hidden="true" />
       </PickerButton>
-      <PickerButton onClick={() => onWrite(" ")}>Toggle</PickerButton>
-      <PickerButton onClick={() => onWrite("a")}>All</PickerButton>
-      <PickerButton onClick={() => onWrite("n")}>None</PickerButton>
+      <PickerButton onClick={() => onWrite(" ")}>
+        {single ? "Choose" : "Toggle"}
+      </PickerButton>
+      {!single ? (
+        <>
+          <PickerButton onClick={() => onWrite("a")}>All</PickerButton>
+          <PickerButton onClick={() => onWrite("n")}>None</PickerButton>
+        </>
+      ) : null}
       <button
         className="bg-text text-panel-strong border-line-strong inline-flex items-center justify-center gap-2.25 rounded-4xl border px-4 py-2.75 font-bold transition-transform hover:-translate-y-0.5"
         type="button"

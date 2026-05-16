@@ -53,7 +53,10 @@ function parsePhase(text: string) {
     const trimmed = line.trim();
     return trimmed ? [trimmed] : [];
   });
-  return lines.find((line) => line.startsWith("▸"))?.replace(/^▸\s*/, "");
+  const phase = lines.find(
+    (line) => line.startsWith("▸") || line.startsWith("в–ё"),
+  );
+  return phase?.replace(/^(▸|в–ё)\s*/, "");
 }
 
 function parseError(text: string) {

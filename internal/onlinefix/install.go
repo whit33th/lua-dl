@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/nwaples/rardecode/v2"
 
@@ -52,7 +54,7 @@ func apply(ctx context.Context, client *http.Client, pageURL, gameDir string) er
 	defer os.RemoveAll(tmpRoot)
 
 	for _, name := range rars {
-		rarURL := fixListURL + strings.ReplaceAll(name, " ", "%20")
+		rarURL := fixListURL + url.PathEscape(name)
 		if err := downloadRAR(ctx, client, rarURL, pageURL, filepath.Join(tmpRoot, name), name); err != nil {
 			return fmt.Errorf("download %s: %w", name, err)
 		}
@@ -64,8 +66,34 @@ func apply(ctx context.Context, client *http.Client, pageURL, gameDir string) er
 	if err != nil {
 		return fmt.Errorf("extract: %w", err)
 	}
+	if missing := missingOnlineFixLoaders(gameDir); len(missing) > 0 {
+		return fmt.Errorf("Online-Fix files are missing after extract: %s", strings.Join(missing, ", "))
+	}
 	ui.LastStep(fmt.Sprintf("applied %d %s", n, ui.Plural(n, "file", "files")))
 	return nil
+}
+func missingOnlineFixLoaders(gameDir string) []string {
+	// Defender can quarantine a just-written DLL shortly after extraction
+	// returns, so require the files to stay present for a short window.
+	var missing []string
+	for i := 0; i < 6; i++ {
+		missing = currentMissingOnlineFixLoaders(gameDir)
+		if len(missing) > 0 {
+			return missing
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return nil
+}
+
+func currentMissingOnlineFixLoaders(gameDir string) []string {
+	var missing []string
+	for _, name := range []string{"OnlineFix64.dll", "winmm.dll"} {
+		if _, err := os.Stat(filepath.Join(gameDir, name)); errors.Is(err, os.ErrNotExist) {
+			missing = append(missing, name)
+		}
+	}
+	return missing
 }
 
 var uploadSlugRE = regexp.MustCompile(`uploads\.online-fix\.me:2053/uploads/([^/"]+)/`)
@@ -79,7 +107,11 @@ func extractUploadSlug(ctx context.Context, client *http.Client, pageURL string)
 	if m == nil {
 		return "", errors.New("no uploads.online-fix.me link on game page")
 	}
-	return m[1], nil
+	slug, err := url.PathUnescape(m[1])
+	if err != nil {
+		return "", err
+	}
+	return slug, nil
 }
 
 // rarHrefRE picks .rar entries out of nginx autoindex HTML. Each file shows
@@ -93,7 +125,11 @@ func listRARs(ctx context.Context, client *http.Client, listURL, referer string)
 	}
 	var out []string
 	for _, m := range rarHrefRE.FindAllStringSubmatch(body, -1) {
-		out = append(out, strings.ReplaceAll(m[1], "%20", " "))
+		name, err := url.PathUnescape(m[1])
+		if err != nil {
+			name = m[1]
+		}
+		out = append(out, filepath.Base(filepath.FromSlash(name)))
 	}
 	return out, nil
 }
@@ -105,6 +141,9 @@ func downloadRAR(ctx context.Context, client *http.Client, url, referer, dst, di
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
+		if res.StatusCode == http.StatusUnauthorized || res.StatusCode == http.StatusForbidden {
+			return fmt.Errorf("online-fix download is unavailable or closed for this game (HTTP %d)", res.StatusCode)
+		}
 		return fmt.Errorf("GET %s: HTTP %d", url, res.StatusCode)
 	}
 	f, err := os.Create(dst)
@@ -157,6 +196,9 @@ func extractOver(rarPath, gameDir string) (int, error) {
 			return n, err
 		}
 		dst := filepath.Join(gameDir, filepath.FromSlash(hdr.Name))
+		if !insideDir(gameDir, dst) {
+			return n, fmt.Errorf("refusing to extract outside game directory: %s", hdr.Name)
+		}
 		if hdr.IsDir {
 			if err := os.MkdirAll(dst, 0o755); err != nil {
 				return n, err
@@ -179,4 +221,17 @@ func extractOver(rarPath, gameDir string) (int, error) {
 		}
 		n++
 	}
+}
+
+func insideDir(root, path string) bool {
+	rootAbs, err := filepath.Abs(root)
+	if err != nil {
+		return false
+	}
+	pathAbs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	rel, err := filepath.Rel(rootAbs, pathAbs)
+	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }

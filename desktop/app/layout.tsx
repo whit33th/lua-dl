@@ -1,6 +1,5 @@
 import WindowFrame from "@/components/window-frame/window-frame";
 import type { Metadata } from "next";
-import { Arimo, Geist } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -8,11 +7,6 @@ export const metadata: Metadata = {
   title: "lua-dl",
   description: "Desktop client for lua-dl",
 };
-const arimo = Arimo({
-  subsets: ["latin"],
-  variable: "--font-arimo",
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${arimo.variable} relative flex min-h-screen w-full flex-col gap-2 overflow-hidden antialiased`}
+        className="relative flex min-h-screen w-full flex-col gap-2 overflow-hidden antialiased"
       >
         <WindowFrame />
         <div className="flex flex-1 flex-col gap-2 p-5 pt-0">

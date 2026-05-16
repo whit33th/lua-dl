@@ -2,6 +2,7 @@ package goldberg
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/bodgit/sevenzip"
 
+	"github.com/hoangvu12/lua-dl/internal/steamshortcut"
 	"github.com/hoangvu12/lua-dl/internal/ui"
 )
 
@@ -46,7 +48,7 @@ func apply(ctx context.Context, appID uint32, gameDir string) error {
 	}
 
 	ui.Step("fetching Goldberg emulator (gbe_fork)")
-	gbeDir, err := fetchGBE(ctx)
+	gbeDir, err := fetchGBE(ctx, gameDir)
 	if err != nil {
 		return fmt.Errorf("fetch gbe: %w", err)
 	}
@@ -56,6 +58,12 @@ func apply(ctx context.Context, appID uint32, gameDir string) error {
 			return fmt.Errorf("apply to %s: %w", filepath.Base(filepath.Dir(dllPath)), err)
 		}
 	}
+	if err := applyUnityRootCopies(gbeDir, gameDir, appID, dlls); err != nil {
+		return fmt.Errorf("apply Unity root copies: %w", err)
+	}
+	if err := writeColdClientFallback(gbeDir, gameDir, appID); err == nil {
+		ui.Step("Wrote Goldberg fallback launcher")
+	}
 
 	ui.LastStep(fmt.Sprintf("applied to %d location(s) · %d interface(s) detected",
 		len(dlls), len(ifaces)))
@@ -64,21 +72,18 @@ func apply(ctx context.Context, appID uint32, gameDir string) error {
 
 // fetchGBE downloads (and caches) the gbe_fork Windows release, returning
 // the directory that contains the extracted steam_api*.dll files.
-func fetchGBE(ctx context.Context) (string, error) {
-	cacheBase, err := os.UserCacheDir()
-	if err != nil {
-		cacheBase = os.TempDir()
-	}
-
+func fetchGBE(ctx context.Context, gameDir string) (string, error) {
 	rel, err := latestRelease(ctx)
 	if err != nil {
 		return "", fmt.Errorf("github: %w", err)
 	}
 
-	cacheDir := filepath.Join(cacheBase, "lua-dl", "gbe", rel.TagName)
-	if allDLLsCached(cacheDir) {
+	cacheBase := filepath.Join(filepath.Dir(gameDir), ".lua-dl", "gbe")
+	cacheDir := filepath.Join(cacheBase, rel.TagName)
+	if cacheComplete(cacheDir) {
 		return cacheDir, nil
 	}
+	_ = os.RemoveAll(cacheDir)
 
 	var assetURL string
 	for _, a := range rel.Assets {
@@ -100,25 +105,8 @@ func fetchGBE(ctx context.Context) (string, error) {
 		return cacheDir, nil
 	}
 
-	if !isDefenderError(err) {
-		return "", err
-	}
-
-	// Defender quarantined the archive — request an exclusion via UAC and retry.
-	_ = os.Remove(filepath.Join(cacheDir, gbeAsset))
-	ui.Step("Windows Defender blocked the download · click Yes in the popup to fix")
-	if exclErr := addDefenderExclusion(cacheDir); exclErr != nil {
-		return "", fmt.Errorf(
-			"auto-fix failed — add this folder to Defender exclusions manually and retry:\n     %s", cacheDir)
-	}
-	ui.Step("exclusion added · re-downloading (once only — cached after this)")
-
-	if err := downloadAndExtract(ctx, assetURL, cacheDir); err != nil {
-		return "", fmt.Errorf("retry after exclusion: %w", err)
-	}
-	return cacheDir, nil
+	return "", err
 }
-
 func downloadAndExtract(ctx context.Context, assetURL, cacheDir string) error {
 	archivePath := filepath.Join(cacheDir, gbeAsset)
 	if err := downloadFile(ctx, assetURL, archivePath); err != nil {
@@ -139,6 +127,18 @@ func allDLLsCached(dir string) bool {
 		}
 	}
 	return true
+}
+
+func cacheComplete(dir string) bool {
+	if !allDLLsCached(dir) {
+		return false
+	}
+	for _, name := range []string{"steamclient_loader_64.exe", "steamclient_loader.exe", "steamclient64.dll"} {
+		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
+			return true
+		}
+	}
+	return false
 }
 
 func latestRelease(ctx context.Context) (*ghRelease, error) {
@@ -190,8 +190,8 @@ func downloadFile(ctx context.Context, url, destPath string) error {
 	return err
 }
 
-// extractDLLs pulls steam_api.dll and steam_api64.dll out of the 7z archive
-// into destDir. It takes the first match for each name regardless of path depth.
+// extractDLLs pulls the useful Windows release files out of the 7z archive
+// into destDir. It takes the first match for each basename regardless of path depth.
 func extractDLLs(archivePath, destDir string) error {
 	r, err := sevenzip.OpenReader(archivePath)
 	if err != nil {
@@ -204,6 +204,14 @@ func extractDLLs(archivePath, destDir string) error {
 		"steam_api.dll":   false,
 		"steam_api64.dll": false,
 	}
+	optional := map[string]bool{
+		"steamclient.dll":           false,
+		"steamclient64.dll":         false,
+		"steamclient_loader.exe":    false,
+		"steamclient_loader_32.exe": false,
+		"steamclient_loader_64.exe": false,
+		"coldclientloader.ini":      false,
+	}
 
 	for _, f := range r.File {
 		if f.FileInfo().IsDir() {
@@ -211,6 +219,9 @@ func extractDLLs(archivePath, destDir string) error {
 		}
 		name := strings.ToLower(filepath.Base(filepath.FromSlash(f.Name)))
 		done, want := needed[name]
+		if !want {
+			done, want = optional[name]
+		}
 		if !want || done {
 			continue
 		}
@@ -230,7 +241,11 @@ func extractDLLs(archivePath, destDir string) error {
 		if copyErr != nil {
 			return copyErr
 		}
-		needed[name] = true
+		if _, ok := needed[name]; ok {
+			needed[name] = true
+		} else {
+			optional[name] = true
+		}
 	}
 
 	for name, found := range needed {
@@ -244,7 +259,10 @@ func extractDLLs(archivePath, destDir string) error {
 // applyToLocation backs up the original DLL, replaces it with Goldberg's
 // version, and writes steam_settings/ config files next to it.
 func applyToLocation(gbeDir, dllPath string, appID uint32, ifaces []string) error {
-	dllName := strings.ToLower(filepath.Base(dllPath))
+	dllName, err := emulatorDLLName(dllPath)
+	if err != nil {
+		return err
+	}
 	srcDLL := filepath.Join(gbeDir, dllName)
 	if _, err := os.Stat(srcDLL); err != nil {
 		return fmt.Errorf("goldberg %s not found in cache", dllName)
@@ -252,12 +270,15 @@ func applyToLocation(gbeDir, dllPath string, appID uint32, ifaces []string) erro
 
 	// Backup original
 	backupPath := dllPath + ".bak"
-	if err := os.Rename(dllPath, backupPath); err != nil {
-		return fmt.Errorf("backup original: %w", err)
+	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+		if err := os.Rename(dllPath, backupPath); err != nil {
+			return fmt.Errorf("backup original: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("check backup: %w", err)
 	}
 
 	if err := copyFile(srcDLL, dllPath); err != nil {
-		_ = os.Rename(backupPath, dllPath) // restore on failure
 		return fmt.Errorf("copy emulator dll: %w", err)
 	}
 
@@ -284,7 +305,214 @@ func applyToLocation(gbeDir, dllPath string, appID uint32, ifaces []string) erro
 		}
 	}
 
+	writeDefaultConfigs(settingsDir)
+	writePersona(settingsDir)
 	return nil
+}
+
+func writeDefaultConfigs(settingsDir string) {
+	_ = os.WriteFile(filepath.Join(settingsDir, "configs.app.ini"), []byte("[app::dlcs]\nunlock_all=1\n"), 0o644)
+	_ = os.WriteFile(filepath.Join(settingsDir, "configs.main.ini"), []byte("[main::general]\nnew_app_ticket=1\ngc_token=1\n"), 0o644)
+}
+
+func applyUnityRootCopies(gbeDir, gameDir string, appID uint32, dlls []string) error {
+	roots, err := unityRoots(gameDir)
+	if err != nil || len(roots) == 0 {
+		return err
+	}
+	for _, root := range roots {
+		arch := ""
+		for _, dllPath := range dlls {
+			rel, err := filepath.Rel(root, dllPath)
+			if err == nil && !strings.HasPrefix(rel, "..") {
+				arch, _ = peArch(dllPath)
+				break
+			}
+		}
+		if arch == "" {
+			arch = "x64"
+		}
+		srcName := "steam_api.dll"
+		if arch == "x64" {
+			srcName = "steam_api64.dll"
+		}
+		if err := copyFile(filepath.Join(gbeDir, srcName), filepath.Join(root, "steam_api.dll")); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(root, "steam_appid.txt"), []byte(fmt.Sprintf("%d\n", appID)), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func unityRoots(gameDir string) ([]string, error) {
+	seen := map[string]bool{}
+	var roots []string
+	err := filepath.WalkDir(gameDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil || !d.IsDir() {
+			return err
+		}
+		if strings.HasSuffix(strings.ToLower(d.Name()), "_data") {
+			root := filepath.Dir(path)
+			if !seen[root] {
+				seen[root] = true
+				roots = append(roots, root)
+			}
+		}
+		return nil
+	})
+	return roots, err
+}
+
+func writeColdClientFallback(gbeDir, gameDir string, appID uint32) error {
+	exe, err := mainExe(gameDir)
+	if err != nil {
+		return err
+	}
+	arch, err := peArch(exe)
+	if err != nil {
+		return err
+	}
+	loader := "steamclient_loader.exe"
+	if arch == "x64" {
+		loader = firstExisting(gbeDir, "steamclient_loader_64.exe", "steamclient_loader.exe")
+	} else {
+		loader = firstExisting(gbeDir, "steamclient_loader_32.exe", "steamclient_loader.exe")
+	}
+	if loader == "" {
+		return fmt.Errorf("ColdClientLoader not in cached release")
+	}
+	loaderSrc := filepath.Join(gbeDir, loader)
+	loaderDst := filepath.Join(gameDir, loader)
+	if err := copyFile(loaderSrc, loaderDst); err != nil {
+		return err
+	}
+
+	steamclient := "steamclient.dll"
+	if arch == "x64" {
+		steamclient = "steamclient64.dll"
+	}
+	if _, err := os.Stat(filepath.Join(gbeDir, steamclient)); err == nil {
+		if err := copyFile(filepath.Join(gbeDir, steamclient), filepath.Join(gameDir, steamclient)); err != nil {
+			return err
+		}
+	}
+
+	ini := fmt.Sprintf("[SteamClient]\nExe=%s\nExeRunDir=.\nExeCommandLine=\nAppId=%d\nSteamClientDll=%s\n", filepath.Base(exe), appID, steamclient)
+	if err := os.WriteFile(filepath.Join(gameDir, "ColdClientLoader.ini"), []byte(ini), 0o644); err != nil {
+		return err
+	}
+	bat := fmt.Sprintf("@echo off\r\ncd /d %%~dp0\r\n\"%%~dp0%s\"\r\n", loader)
+	return os.WriteFile(filepath.Join(gameDir, "launch-goldberg-loader.bat"), []byte(bat), 0o644)
+}
+
+func firstExisting(dir string, names ...string) string {
+	for _, name := range names {
+		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
+			return name
+		}
+	}
+	return ""
+}
+
+func mainExe(gameDir string) (string, error) {
+	base := strings.TrimSuffix(filepath.Base(gameDir), string(filepath.Separator))
+	preferred := filepath.Join(gameDir, base+".exe")
+	if _, err := os.Stat(preferred); err == nil {
+		return preferred, nil
+	}
+	var found string
+	err := filepath.WalkDir(gameDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || found != "" {
+			return err
+		}
+		if strings.EqualFold(filepath.Ext(d.Name()), ".exe") {
+			found = path
+		}
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if found == "" {
+		return "", fmt.Errorf("no exe found")
+	}
+	return found, nil
+}
+
+func emulatorDLLName(dllPath string) (string, error) {
+	base := strings.ToLower(filepath.Base(dllPath))
+	if base == "steam_api64.dll" {
+		return base, nil
+	}
+	arch, err := peArch(dllPath)
+	if err != nil {
+		return "", fmt.Errorf("detect dll architecture: %w", err)
+	}
+	if arch == "x64" {
+		return "steam_api64.dll", nil
+	}
+	return "steam_api.dll", nil
+}
+
+func peArch(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	var dos [64]byte
+	if _, err := io.ReadFull(f, dos[:]); err != nil {
+		return "", err
+	}
+	peOffset := int64(binary.LittleEndian.Uint32(dos[0x3c:]))
+	if peOffset <= 0 {
+		return "", fmt.Errorf("invalid PE header offset")
+	}
+	if _, err := f.Seek(peOffset, io.SeekStart); err != nil {
+		return "", err
+	}
+	var hdr [6]byte
+	if _, err := io.ReadFull(f, hdr[:]); err != nil {
+		return "", err
+	}
+	if string(hdr[:4]) != "PE\x00\x00" {
+		return "", fmt.Errorf("missing PE signature")
+	}
+	switch binary.LittleEndian.Uint16(hdr[4:]) {
+	case 0x8664:
+		return "x64", nil
+	case 0x14c:
+		return "x86", nil
+	default:
+		return "", fmt.Errorf("unsupported PE machine 0x%x", binary.LittleEndian.Uint16(hdr[4:]))
+	}
+}
+
+// writePersona populates account_name.txt, user_steam_id.txt, and
+// language.txt from the user's real Steam install so Goldberg-cracked
+// games show the user's actual persona/ID/language instead of the
+// generic Goldberg defaults. Best-effort: skips silently when Steam
+// isn't installed or no account is logged in.
+func writePersona(settingsDir string) {
+	steamPath, ok := steamshortcut.FindSteam()
+	if !ok {
+		return
+	}
+	if a, err := steamshortcut.MostRecentAccount(steamPath); err == nil {
+		if a.Persona != "" {
+			_ = os.WriteFile(filepath.Join(settingsDir, "account_name.txt"),
+				[]byte(a.Persona+"\n"), 0o644)
+		}
+		if a.SteamID64 != 0 {
+			_ = os.WriteFile(filepath.Join(settingsDir, "user_steam_id.txt"),
+				[]byte(fmt.Sprintf("%d\n", a.SteamID64)), 0o644)
+		}
+	}
+	_ = os.WriteFile(filepath.Join(settingsDir, "language.txt"),
+		[]byte(steamshortcut.SteamLanguage()+"\n"), 0o644)
 }
 
 func copyFile(src, dst string) error {

@@ -9,6 +9,9 @@ export function extractPromptMeta(
   context: PromptContext = {},
 ): { title: string; subtitle: string } {
   if (kind === "picker") {
+    if (/space choose/i.test(text)) {
+      return { title: "Choose one match", subtitle: "Single selection" };
+    }
     return { title: "Select content to download", subtitle: "Choose depots" };
   }
 

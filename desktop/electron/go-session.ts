@@ -169,7 +169,7 @@ function detectPrompt(text: string) {
   }
 
   if (
-    /Select optional depots:|Pick one:|\bmove\b.*\bspace toggle\b/i.test(
+    /Select optional depots:|Pick one:|\bmove\b.*\bspace (toggle|choose)\b/i.test(
       normalized,
     )
   ) {
