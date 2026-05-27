@@ -24,8 +24,23 @@ jobs:
           GOOS: windows
           GOARCH: amd64
           CGO_ENABLED: '0'
+          RYUU_AUTH_CODE: ${{ secrets.RYUU_AUTH_CODE }}
         run: |
-          go build -trimpath -ldflags="-s -w" -o lua-dl.exe ./cmd/lua-dl
+          if [ -z "$RYUU_AUTH_CODE" ]; then
+            echo "::error::RYUU_AUTH_CODE secret is not set on this repo"
+            exit 1
+          fi
+          # XOR + hex obfuscate the auth code so it doesn't appear as a plain
+          # string in the binary. Deobfuscation mirror lives in internal/ryuu.
+          OBFUSCATED=$(RYUU_AUTH_CODE="$RYUU_AUTH_CODE" python3 -c '
+          import os
+          key = b"lua-dl/v1/ryuu-auth-xor-key"
+          data = os.environ["RYUU_AUTH_CODE"].encode()
+          print(bytes(b ^ key[i % len(key)] for i, b in enumerate(data)).hex())
+          ')
+          go build -trimpath \
+            -ldflags="-s -w -X github.com/hoangvu12/lua-dl/internal/ryuu.obfuscatedAuthCode=$OBFUSCATED" \
+            -o lua-dl.exe ./cmd/lua-dl
           ls -la lua-dl.exe
 
       - name: Upload release asset
