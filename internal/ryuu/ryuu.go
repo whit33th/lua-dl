@@ -16,19 +16,59 @@ package ryuu
 import (
 	"context"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
 )
 
-const (
-	authCode = "RYUUMANIFEST-setapikeyforsteamtoolsversion9700"
-	baseURL  = "https://generator.ryuu.lol"
+const baseURL = "https://generator.ryuu.lol"
+
+// obfuscatedAuthCode is injected at build time by the release workflow via
+//
+//	-ldflags "-X github.com/hoangvu12/lua-dl/internal/ryuu.obfuscatedAuthCode=<hex>"
+//
+// It holds the auth code XOR'd with authXORKey and hex-encoded, so the
+// literal value never appears as a plaintext string in the binary. Empty in
+// local dev builds — set the RYUU_AUTH_CODE env var to override at runtime.
+var obfuscatedAuthCode string
+
+// authXORKey is the XOR pad used to obfuscate the injected auth code. It is
+// not a secret — the goal is only to keep the auth code itself out of plain
+// strings scans of the binary.
+const authXORKey = "lua-dl/v1/ryuu-auth-xor-key"
+
+var (
+	authCodeOnce sync.Once
+	authCodeVal  string
 )
+
+func authCode() string {
+	authCodeOnce.Do(func() {
+		if v := os.Getenv("RYUU_AUTH_CODE"); v != "" {
+			authCodeVal = v
+			return
+		}
+		if obfuscatedAuthCode == "" {
+			return
+		}
+		raw, err := hex.DecodeString(obfuscatedAuthCode)
+		if err != nil {
+			return
+		}
+		out := make([]byte, len(raw))
+		for i := range raw {
+			out[i] = raw[i] ^ authXORKey[i%len(authXORKey)]
+		}
+		authCodeVal = string(out)
+	})
+	return authCodeVal
+}
 
 type Bundle struct {
 	Files map[string][]byte // filename → raw bytes
@@ -50,7 +90,7 @@ var addAppidRe = regexp.MustCompile(`(?i)addappid\s*\(`)
 
 // FetchLua downloads just the {appid}.lua text.
 func FetchLua(ctx context.Context, appID uint32) (string, error) {
-	url := fmt.Sprintf("%s/resellerlua?appid=%d&auth_code=%s", baseURL, appID, authCode)
+	url := fmt.Sprintf("%s/resellerlua?appid=%d&auth_code=%s", baseURL, appID, authCode())
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return "", err
@@ -87,7 +127,7 @@ func FetchBundle(ctx context.Context, appID uint32) (*Bundle, error) {
 
 	fut.once.Do(func() {
 		defer close(fut.done)
-		url := fmt.Sprintf("%s/secure_download?appid=%d&auth_code=%s", baseURL, appID, authCode)
+		url := fmt.Sprintf("%s/secure_download?appid=%d&auth_code=%s", baseURL, appID, authCode())
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
 			fut.err = err

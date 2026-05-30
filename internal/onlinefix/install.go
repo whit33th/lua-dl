@@ -16,6 +16,7 @@ import (
 
 	"github.com/nwaples/rardecode/v2"
 
+	"github.com/hoangvu12/lua-dl/internal/defender"
 	"github.com/hoangvu12/lua-dl/internal/ui"
 )
 
@@ -60,18 +61,73 @@ func apply(ctx context.Context, client *http.Client, pageURL, gameDir string) er
 		}
 	}
 
+	ui.Step("adding Defender exclusion for Online-Fix files · click Yes in the popup")
+	if err := defender.AddExclusion(gameDir); err != nil {
+		return fmt.Errorf("auto-fix failed — add this folder to Defender exclusions manually and retry:\n     %s", gameDir)
+	}
+
 	primary := filepath.Join(tmpRoot, primaryRAR(rars))
 	ui.Step(fmt.Sprintf("extracting %s", filepath.Base(primary)))
 	n, err := extractOver(primary, gameDir)
 	if err != nil {
+		if defender.IsBlockedError(err) {
+			n, err = retryAfterDefenderExclusion(primary, gameDir)
+			if err == nil {
+				ui.LastStep(fmt.Sprintf("applied %d %s", n, ui.Plural(n, "file", "files")))
+				return nil
+			}
+		}
 		return fmt.Errorf("extract: %w", err)
 	}
 	if missing := missingOnlineFixLoaders(gameDir); len(missing) > 0 {
-		return fmt.Errorf("Online-Fix files are missing after extract: %s", strings.Join(missing, ", "))
+		ui.Step(fmt.Sprintf("Online-Fix files missing after extract (%s) · click Yes in the popup to fix", strings.Join(missing, ", ")))
+		n, err = retryAfterDefenderExclusion(primary, gameDir)
+		if err != nil {
+			return err
+		}
 	}
 	ui.LastStep(fmt.Sprintf("applied %d %s", n, ui.Plural(n, "file", "files")))
 	return nil
 }
+func missingOnlineFixLoaders(gameDir string) []string {
+	// Defender can quarantine a just-written DLL shortly after extraction
+	// returns, so require the files to stay present for a short window.
+	var missing []string
+	for i := 0; i < 6; i++ {
+		missing = currentMissingOnlineFixLoaders(gameDir)
+		if len(missing) > 0 {
+			return missing
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return nil
+}
+
+func currentMissingOnlineFixLoaders(gameDir string) []string {
+	var missing []string
+	for _, name := range []string{"OnlineFix64.dll", "winmm.dll"} {
+		if _, err := os.Stat(filepath.Join(gameDir, name)); errors.Is(err, os.ErrNotExist) {
+			missing = append(missing, name)
+		}
+	}
+	return missing
+}
+
+func retryAfterDefenderExclusion(primary, gameDir string) (int, error) {
+	if exclErr := defender.AddExclusion(gameDir); exclErr != nil {
+		return 0, fmt.Errorf("auto-fix failed — add this folder to Defender exclusions manually and retry:\n     %s", gameDir)
+	}
+	ui.Step("exclusion added · extracting Online-Fix again")
+	n, err := extractOver(primary, gameDir)
+	if err != nil {
+		return n, fmt.Errorf("extract after exclusion: %w", err)
+	}
+	if missing := missingOnlineFixLoaders(gameDir); len(missing) > 0 {
+		return n, fmt.Errorf("Online-Fix files are still missing after exclusion: %s", strings.Join(missing, ", "))
+	}
+	return n, nil
+}
+
 func missingOnlineFixLoaders(gameDir string) []string {
 	// Defender can quarantine a just-written DLL shortly after extraction
 	// returns, so require the files to stay present for a short window.

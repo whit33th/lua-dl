@@ -78,8 +78,7 @@ func fetchGBE(ctx context.Context, gameDir string) (string, error) {
 		return "", fmt.Errorf("github: %w", err)
 	}
 
-	cacheBase := filepath.Join(filepath.Dir(gameDir), ".lua-dl", "gbe")
-	cacheDir := filepath.Join(cacheBase, rel.TagName)
+	cacheDir := filepath.Join(cacheBase, "lua-dl", "gbe", rel.TagName)
 	if cacheComplete(cacheDir) {
 		return cacheDir, nil
 	}
